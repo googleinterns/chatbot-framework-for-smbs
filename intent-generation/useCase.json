@@ -1,0 +1,26 @@
+{
+    "SuggestImageUpload": {
+        "successors": ["UploadImage", "ExitWithThanks", "LikeToKnowBenefits"],
+        "variables": ["x1", "x2"],
+        "trainingPhrases": ["My name is |@sys.given-name;given-name;John| and I am from |@sys.geo-country;geo-country;India|.",
+            "My name is |@sys.given-name;given-name;Philips| and I am from |@sys.geo-country;geo-country;England|."]
+    },
+    "UploadImage" :{
+        "successors": [],
+        "variables": [],
+        "trainingPhrases": ["My name is |@sys.given-name;given-name;John| and I am from |@sys.geo-country;geo-country;India|.",
+            "My name is |@sys.given-name;given-name;Philips| and I am from |@sys.geo-country;geo-country;England|."]
+    },
+    "LikeToKnowBenefits": {
+        "successors": ["ExitWithThanks", "ExplainBenefits"],
+        "variables": [],
+        "trainingPhrases": ["My name is |@sys.given-name;given-name;John| and I am from |@sys.geo-country;geo-country;India|.",
+            "My name is |@sys.given-name;given-name;Philips| and I am from |@sys.geo-country;geo-country;England|."]
+    },
+    "ExplainBenefits": {
+        "successors": ["UploadImage", "ExitWithThanks"],
+        "variables": [],
+        "trainingPhrases": ["My name is |@sys.given-name;given-name;John| and I am from |@sys.geo-country;geo-country;India|.",
+            "My name is |@sys.given-name;given-name;Philips| and I am from |@sys.geo-country;geo-country;England|."]
+    }
+}
