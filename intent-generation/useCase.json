@@ -3,24 +3,28 @@
         "successors": ["UploadImage", "ExitWithThanks", "LikeToKnowBenefits"],
         "variables": ["x1", "x2"],
         "trainingPhrases": ["My name is |@sys.given-name;given-name;John| and I am from |@sys.geo-country;geo-country;India|.",
-            "My name is |@sys.given-name;given-name;Philips| and I am from |@sys.geo-country;geo-country;England|."]
+            "My name is |@sys.given-name;given-name;Philips| and I am from |@sys.geo-country;geo-country;England|."],
+        "responses": ["This is response 1", "This is response 2"]
     },
     "UploadImage" :{
         "successors": [],
         "variables": [],
-        "trainingPhrases": ["My name is |@sys.given-name;given-name;John| and I am from |@sys.geo-country;geo-country;India|.",
-            "My name is |@sys.given-name;given-name;Philips| and I am from |@sys.geo-country;geo-country;England|."]
+        "trainingPhrases": ["My nd dame is |@sys.given-name;given-name;John| and I am from |@sys.geo-country;geo-country;India|.",
+            "My name is |@sys.given-name;given-name;Philips| and I am from |@sys.geo-country;geo-country;England|."],
+        "responses": ["This is response 1", "This is response 2"]
     },
     "LikeToKnowBenefits": {
         "successors": ["ExitWithThanks", "ExplainBenefits"],
         "variables": [],
         "trainingPhrases": ["My name is |@sys.given-name;given-name;John| and I am from |@sys.geo-country;geo-country;India|.",
-            "My name is |@sys.given-name;given-name;Philips| and I am from |@sys.geo-country;geo-country;England|."]
+            "My name is |@sys.given-name;given-name;Philips| and I am from |@sys.geo-country;geo-country;England|."],
+        "responses": ["This is response 1", "This is response 2"]
     },
     "ExplainBenefits": {
         "successors": ["UploadImage", "ExitWithThanks"],
         "variables": [],
         "trainingPhrases": ["My name is |@sys.given-name;given-name;John| and I am from |@sys.geo-country;geo-country;India|.",
-            "My name is |@sys.given-name;given-name;Philips| and I am from |@sys.geo-country;geo-country;England|."]
+            "My name is |@sys.given-name;given-name;Philips| and I am from |@sys.geo-country;geo-country;England|."],
+        "responses": ["This is response 1", "This is response 2"]
     }
 }
