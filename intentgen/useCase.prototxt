@@ -1,0 +1,37 @@
+intents {
+  intent_name: "SuggestImageUpload"
+  successors: "UploadImage"
+  successors: "ExitWithThanks"
+  successors: "LikeToKnowBenefits"
+  trainingPhrases: "I want to upload some images for my business"
+  responses: "Would you like add some new images for you business?"
+  events: "SUGGEST_IMAGE_UPLOAD"
+}
+intents {
+  intent_name: "UploadImage"
+  trainingPhrases: "Yes"
+  trainingPhrases: "Yes I would like that"
+  trainingPhrases: "I want to do that"
+  trainingPhrases: "Yes, please"
+  responses: "You can upload the images right here in the chat"
+}
+intents {
+  intent_name: "LikeToKnowBenefits"
+  successors: "ExitWithThanks"
+  successors: "ExplainBenefits"
+  trainingPhrases: "I am not sure"
+  trainingPhrases: "Why do I need to upload images?"
+  trainingPhrases: "Why is this required?"
+  trainingPhrases: "What is the benefit of adding images?"
+  responses: "Would you like to know the benefits of adding images to your business?"
+}
+intents {
+  intent_name: "ExplainBenefits"
+  successors: "ExitWithThanks"
+  successors: "UploadImages"
+  trainingPhrases: "Yes"
+  trainingPhrases: "yeah tell me"
+  trainingPhrases: "Ok"
+  trainingPhrases: "Sure"  
+  responses: "These are some benefits of adding images for you business"
+}

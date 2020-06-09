@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option java_package = "com.chatbot.protobuf";
+
+message UseCase {
+
+  message Intent {
+    string intent_name = 1;
+    repeated string successors = 2;
+    repeated string variables = 3;
+    repeated string trainingPhrases = 4;
+    repeated string responses = 5;
+    repeated string events = 6;
+  }
+
+  repeated Intent intents = 1;
+}
