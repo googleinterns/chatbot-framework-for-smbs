@@ -9,10 +9,7 @@ intents {
 }
 intents {
   intent_name: "UploadImage"
-  trainingPhrases: "Yes"
-  trainingPhrases: "Yes I would like that"
-  trainingPhrases: "I want to do that"
-  trainingPhrases: "Yes, please"
+  intent_type: YES
   responses: "You can upload the images right here in the chat"
 }
 intents {
@@ -29,9 +26,6 @@ intents {
   intent_name: "ExplainBenefits"
   successors: "ExitWithThanks"
   successors: "UploadImages"
-  trainingPhrases: "Yes"
-  trainingPhrases: "yeah tell me"
-  trainingPhrases: "Ok"
-  trainingPhrases: "Sure"  
-  responses: "These are some benefits of adding images for you business"
+  intent_type: YES
+  responses: "These are some of the many benefits of adding images for you business"
 }
