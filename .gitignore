@@ -38,3 +38,9 @@ buildNumber.properties
 .settings/
 .vscode/
 *.classpath
+
+HELP.md
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**
+!**/src/test/**
