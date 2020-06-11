@@ -29,23 +29,23 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 public class IntentGenerator {
-  static List<String> YES_TRAINING_PHRASES = new ArrayList<String>(Arrays.asList("yes",
+  static final List<String> YES_TRAINING_PHRASES = new ArrayList<String>(Arrays.asList("yes",
       "okay I will", "why not", "yes that's alright", "yes I do", "exactly", "of course",
       "yep that's ok", "okay", "ok", "sure"));
-  static List<String> NO_TRAINING_PHRASES = new ArrayList<String>(Arrays.asList("No",
+  static final List<String> NO_TRAINING_PHRASES = new ArrayList<String>(Arrays.asList("No",
       "thanks but no", "no way", "no no don't", "na", "no it isn't", "don't", "nah I'm good",
       "no I cannot", "I can't"));
 
   public static void main(final String[] args) throws ParseException {
-    String useCaseFile = getUseCaseFile(args);
-    String projectID = System.getenv("projectID");
-    ProjectAgentName parent = ProjectAgentName.of(projectID);
+    final String useCaseFile = getUseCaseFile(args);
+    final String projectID = System.getenv("projectID");
+    final ProjectAgentName parent = ProjectAgentName.of(projectID);
     try(IntentsClient intentsClient = IntentsClient.create()) {
       // this map is needed to check if an intent display name already exists and if so, instead of 
       // creating an intent (which would return an error) we update the intent using the name
-      Map<String, String> intentDisplayNameToName = getIntentDisplayNametoNameMapping(intentsClient,
+      final Map<String, String> intentDisplayNameToName = getIntentDisplayNametoNameMapping(intentsClient,
           parent);
-      List<Intent> intentProtobufList = getIntentsInUseCase(useCaseFile).stream()
+      final List<Intent> intentProtobufList = getIntentsInUseCase(useCaseFile).stream()
           .map(x->intentToIntentProtobuf(x, intentDisplayNameToName, projectID))
           .collect(Collectors.toList());
       createOrUpdateIntents(intentProtobufList, intentsClient, intentDisplayNameToName, parent);
@@ -56,13 +56,13 @@ public class IntentGenerator {
 
   public static TrainingPhrase encodedStringToTrainingPhrase(String trainingPhrase) {
     TrainingPhrase.Builder trainingPhraseProtobufBuilder = TrainingPhrase.newBuilder();
-    String[] trainingPhraseParts = trainingPhrase.split("\\|");
+    final String[] trainingPhraseParts = trainingPhrase.split("\\|");
     List<Part> partProtobufList = new ArrayList<Part>();
     for(String part: trainingPhraseParts) {
       Part partProtobuf;
       // semicolon implies that this part is an entity
       if(part.indexOf(";") != -1) {
-        String[] entityParts = part.split(";");
+        final String[] entityParts = part.split(";");
         partProtobuf = Part.newBuilder()
         .setEntityType(entityParts[0])
         .setAlias(entityParts[1])
@@ -109,7 +109,7 @@ public class IntentGenerator {
 
   private static Intent.Builder addResponses(UseCase.Intent intent,
       Intent.Builder intentProtobufBuilder) {
-    Intent.Message message = Intent.Message.newBuilder()
+    final Intent.Message message = Intent.Message.newBuilder()
         .setText(Intent.Message.Text.newBuilder().addAllText(intent.getResponsesList()).build())
         .build();
     return intentProtobufBuilder.addMessages(message);
@@ -162,17 +162,17 @@ public class IntentGenerator {
 
   private static Options defineOptions() {
     Options options = new Options();
-    Option useCaseFile = Option.builder("f").hasArg()
+    final Option useCaseFile = Option.builder("f").hasArg()
         .desc("prototxt file describing the use case" ).build();
     options.addOption(useCaseFile);
     return options;
   }
   
   private static String getUseCaseFile(String [] args) throws ParseException {
-    Options options = defineOptions();
-    CommandLineParser parser = new DefaultParser();
-    CommandLine cmd = parser.parse(options, args);
-    String fileName = cmd.getOptionValue("f");
+    final Options options = defineOptions();
+    final CommandLineParser parser = new DefaultParser();
+    final CommandLine cmd = parser.parse(options, args);
+    final String fileName = cmd.getOptionValue("f");
     if(fileName.equals("")) {
       throw new ParseException("No file name provided");
     }
