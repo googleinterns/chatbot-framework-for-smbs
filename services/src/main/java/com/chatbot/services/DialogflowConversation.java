@@ -1,5 +1,7 @@
 package com.chatbot.services;
 
+import com.google.cloud.dialogflow.v2.Context;
+import com.google.cloud.dialogflow.v2.ContextsClient;
 import com.google.cloud.dialogflow.v2.DetectIntentRequest;
 import com.google.cloud.dialogflow.v2.DetectIntentResponse;
 import com.google.cloud.dialogflow.v2.QueryInput;
@@ -12,7 +14,8 @@ import com.google.protobuf.Struct;
 import com.google.cloud.dialogflow.v2.EventInput;
 
 import java.io.IOException;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DialogflowConversation {
 
@@ -32,62 +35,49 @@ public class DialogflowConversation {
     this.sessionID = sessionID;
   }
 
-  public DialogflowConversation(String projectID) {
-    this.projectID = projectID;
-    this.langCode = "en";
-    // if the session ID is not provided, generate a random UUID
-    this.sessionID = UUID.randomUUID().toString();
-  }
-  // function to send a message to dialogflow and get the response
+  // function to get the response for a user message from dialogflow
   public String sendMessage(String message, Struct payload) throws IOException {
     try (SessionsClient sessionsClient = SessionsClient.create()) {
       SessionName session = SessionName.of(this.projectID, this.sessionID);
       TextInput.Builder textInput = TextInput.newBuilder()
-          .setText(message)
-          .setLanguageCode(this.langCode);
-      // the query to be sent to dialogflow
+          .setText(message).setLanguageCode(this.langCode);
       QueryInput queryInput = QueryInput.newBuilder().setText(textInput).build();
-      // build the query params
       QueryParameters queryParameters = QueryParameters.newBuilder().setPayload(payload).build();
-      // Performs the detect intent request
       DetectIntentRequest detectIntentRequest = DetectIntentRequest.newBuilder()
-          .setSession(session.toString())
-          .setQueryInput(queryInput)
-          .setQueryParams(queryParameters)
+          .setSession(session.toString()).setQueryInput(queryInput).setQueryParams(queryParameters)
           .build();
       DetectIntentResponse response = sessionsClient.detectIntent(detectIntentRequest);
       QueryResult queryResult = response.getQueryResult();
       return queryResult.getFulfillmentText();
     }
   }
-  // function to trigger a dialogflow event and get the reponse
-  public String triggerEvent(String event, Struct payload) throws IOException {
+
+  // function to get the response for an event from dialogflow
+  public String triggerEvent(String event, Struct parameters, Struct payload) throws IOException {
     try (SessionsClient sessionsClient = SessionsClient.create()) {
       SessionName session = SessionName.of(this.projectID, this.sessionID);
-      System.out.println("Session Path: " + session.toString());
-      // the event to be triggered at dialogflow
-      EventInput.Builder eventInput = EventInput.newBuilder()
-          .setName(event)
-          .setLanguageCode(this.langCode);
-      // set the query to the event to be triggered
+      EventInput.Builder eventInput = EventInput.newBuilder().setName(event)
+          .setParameters(parameters).setLanguageCode(this.langCode);
       QueryInput queryInput = QueryInput.newBuilder().setEvent(eventInput).build();
-      // build the query params
       QueryParameters queryParameters = QueryParameters.newBuilder().setPayload(payload)
-        .build();
-      // Performs the detect intent request
+          .build();
       DetectIntentRequest detectIntentRequest = DetectIntentRequest.newBuilder()
-          .setSession(session.toString())
-          .setQueryInput(queryInput)
-          .setQueryParams(queryParameters)
+          .setSession(session.toString()).setQueryInput(queryInput).setQueryParams(queryParameters)
           .build();
       DetectIntentResponse response = sessionsClient.detectIntent(detectIntentRequest);
       QueryResult queryResult = response.getQueryResult();
-      return queryResult.getQueryText();
+      return queryResult.getFulfillmentText();
     }
   }
 
-  public void printAttrs() {
-    System.out.print(("[projectID = " + projectID + " sessionID = " + sessionID + " langCode = " + langCode + "]"));
+  public List<String> getCurrentContexts() throws Exception {
+    List<String> contextList = new ArrayList<String>();
+    try (ContextsClient contextsClient = ContextsClient.create()) {
+      SessionName session = SessionName.of(this.projectID, this.sessionID);
+      for (Context context : contextsClient.listContexts(session).iterateAll()) {
+        contextList.add(context.getName());
+      }
+    }
+    return contextList;
   }
-
 }
