@@ -1,9 +1,14 @@
 package com.chatbot.services;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.cloud.dialogflow.v2.Context;
 import com.google.cloud.dialogflow.v2.ContextsClient;
 import com.google.cloud.dialogflow.v2.DetectIntentRequest;
 import com.google.cloud.dialogflow.v2.DetectIntentResponse;
+import com.google.cloud.dialogflow.v2.EventInput;
 import com.google.cloud.dialogflow.v2.QueryInput;
 import com.google.cloud.dialogflow.v2.QueryParameters;
 import com.google.cloud.dialogflow.v2.QueryResult;
@@ -11,17 +16,12 @@ import com.google.cloud.dialogflow.v2.SessionName;
 import com.google.cloud.dialogflow.v2.SessionsClient;
 import com.google.cloud.dialogflow.v2.TextInput;
 import com.google.protobuf.Struct;
-import com.google.cloud.dialogflow.v2.EventInput;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class DialogflowConversation {
 
-  String projectID;
-  String langCode;
-  String sessionID;
+  private String projectID;
+  private String langCode;
+  private String sessionID;
 
   public DialogflowConversation(String projectID, String langCode, String sessionID) {
     this.projectID = projectID;
@@ -75,7 +75,9 @@ public class DialogflowConversation {
     try (ContextsClient contextsClient = ContextsClient.create()) {
       SessionName session = SessionName.of(this.projectID, this.sessionID);
       for (Context context : contextsClient.listContexts(session).iterateAll()) {
-        contextList.add(context.getName());
+        // the name returned is the complete path of the context, of which we only need the name
+        String[] contextNameParts = context.getName().split("/");
+        contextList.add(contextNameParts[contextNameParts.length - 1]);
       }
     }
     return contextList;
