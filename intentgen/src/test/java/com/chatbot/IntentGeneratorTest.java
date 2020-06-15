@@ -1,10 +1,9 @@
 package com.chatbot;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import com.google.cloud.dialogflow.v2.Intent.TrainingPhrase;
 import com.google.cloud.dialogflow.v2.Intent.TrainingPhrase.Part;
-
 import org.junit.Test;
 
 public class IntentGeneratorTest 
@@ -14,8 +13,9 @@ public class IntentGeneratorTest
     String trainingStringWithNoEntities = "This is a training phrase with no entities";
     TrainingPhrase trainingPhrase = IntentGenerator.buildTrainingPhraseFromEncodedString(
         trainingStringWithNoEntities);
-    assertTrue(trainingPhrase.getPartsCount() == 1 
-        && trainingPhrase.getParts(0).getText().equals(trainingStringWithNoEntities));
+    // since there are no entities there should be only one part in this training phrase
+    assertEquals(trainingPhrase.getPartsCount(), 1); 
+    assertEquals(trainingPhrase.getParts(0).getText(), trainingStringWithNoEntities);
   }
 
   @Test
@@ -28,10 +28,10 @@ public class IntentGeneratorTest
     String entity = EntityPart.getEntityType().toString();
     String alias = EntityPart.getAlias();
     String text = EntityPart.getText();
-    assertTrue( trainingPhrase.getPartsCount() == 2
-        && textPart.equals("He lives in ")
-        && entity.equals("@sys.country")
-        && alias.equals("country")
-        && text.equals("Peru"));
+    assertEquals( trainingPhrase.getPartsCount(), 2);
+    assertEquals(textPart, "He lives in ");
+    assertEquals(entity, "@sys.country");
+    assertEquals(alias, "country");
+    assertEquals(text, "Peru");
   }
 }

@@ -35,6 +35,9 @@ public class IntentGenerator {
   static final List<String> NO_TRAINING_PHRASES = new ArrayList<String>(Arrays.asList("No",
       "thanks but no", "no way", "no no don't", "na", "no it isn't", "don't", "nah I'm good",
       "no I cannot", "I can't"));
+  static final int ENTITY_TYPE_INDEX = 0;
+  static final int ALIAS_INDEX = 1;
+  static final int VALUE_INDEX = 2;
   private static Map<String, String> intentDisplayNameToName;
 
   public static void main(final String[] args) throws ParseException {
@@ -66,9 +69,6 @@ public class IntentGenerator {
   // To include entities into strings the syntax used is: |entity-type;alias;value|
   // A valid string would be "some text |@sys.name;name;Foo| some text"
   public static TrainingPhrase buildTrainingPhraseFromEncodedString(String trainingPhrase) {
-    int ENTITY_TYPE_INDEX = 0;
-    int ALIAS_INDEX = 1;
-    int VALUE_INDEX = 2;
     TrainingPhrase.Builder trainingPhraseProtobufBuilder = TrainingPhrase.newBuilder();
     final String[] trainingPhraseParts = trainingPhrase.split("\\|");
     List<Part> partProtobufList = new ArrayList<Part>();
