@@ -35,18 +35,27 @@ public class IntentGenerator {
   static final List<String> NO_TRAINING_PHRASES = new ArrayList<String>(Arrays.asList("No",
       "thanks but no", "no way", "no no don't", "na", "no it isn't", "don't", "nah I'm good",
       "no I cannot", "I can't"));
+  private static Map<String, String> intentDisplayNameToName;
 
   public static void main(final String[] args) throws ParseException {
-    final String useCaseFile = getUseCaseFile(args);
+    Options options = new Options();
+    final Option useCaseFile = Option.builder("f").hasArg()
+        .desc("prototxt file describing the use case" ).build();
+    options.addOption(useCaseFile);
+    final CommandLineParser parser = new DefaultParser();
+    final CommandLine cmd = parser.parse(options, args);
+    final String fileName = cmd.getOptionValue("f");
+    if(fileName.isEmpty()) {
+      throw new ParseException("No file name provided");
+    }
     final String projectID = System.getenv("projectID");
     final ProjectAgentName parent = ProjectAgentName.of(projectID);
     try(IntentsClient intentsClient = IntentsClient.create()) {
       // this map is needed to check if an intent display name already exists and if so, instead of 
       // creating an intent (which would return an error) we update the intent using the name
-      final Map<String, String> intentDisplayNameToName = getIntentDisplayNametoNameMapping(intentsClient,
-          parent);
-      final List<Intent> intentProtobufList = getIntentsInUseCase(useCaseFile).stream()
-          .map(x->intentToIntentProtobuf(x, intentDisplayNameToName, projectID))
+      intentDisplayNameToName = getIntentDisplayNametoNameMapping(intentsClient, parent);
+      final List<Intent> intentProtobufList = getIntentsInUseCase(fileName).stream()
+          .map(x->buildIntentProtobufForIntent(x, projectID))
           .collect(Collectors.toList());
       createOrUpdateIntents(intentProtobufList, intentsClient, intentDisplayNameToName, parent);
     } catch (Exception e) {
@@ -54,7 +63,12 @@ public class IntentGenerator {
     }
   }
 
-  public static TrainingPhrase encodedStringToTrainingPhrase(String trainingPhrase) {
+  // To include entities into strings the syntax used is: |entity-type;alias;value|
+  // A valid string would be "some text |@sys.name;name;Foo| some text"
+  public static TrainingPhrase buildTrainingPhraseFromEncodedString(String trainingPhrase) {
+    int ENTITY_TYPE_INDEX = 0;
+    int ALIAS_INDEX = 1;
+    int VALUE_INDEX = 2;
     TrainingPhrase.Builder trainingPhraseProtobufBuilder = TrainingPhrase.newBuilder();
     final String[] trainingPhraseParts = trainingPhrase.split("\\|");
     List<Part> partProtobufList = new ArrayList<Part>();
@@ -64,9 +78,9 @@ public class IntentGenerator {
       if(part.indexOf(";") != -1) {
         final String[] entityParts = part.split(";");
         partProtobuf = Part.newBuilder()
-        .setEntityType(entityParts[0])
-        .setAlias(entityParts[1])
-        .setText(entityParts[2])
+        .setEntityType(entityParts[ENTITY_TYPE_INDEX])
+        .setAlias(entityParts[ALIAS_INDEX])
+        .setText(entityParts[VALUE_INDEX])
         .build();
       } else {
         partProtobuf = Part.newBuilder().setText(part).build();
@@ -100,7 +114,7 @@ public class IntentGenerator {
       trainingPhrasesStringList.addAll(NO_TRAINING_PHRASES);
     }
     List<TrainingPhrase> userTrainingPhrases = trainingPhrasesStringList.stream()
-        .map(trainingPhrase -> encodedStringToTrainingPhrase(trainingPhrase))
+        .map(trainingPhrase -> buildTrainingPhraseFromEncodedString(trainingPhrase))
         .collect(Collectors.toList()); 
     trainingPhrasesProtobufList.addAll(userTrainingPhrases);
     intentProtobufBuilder.addAllTrainingPhrases(trainingPhrasesProtobufList);
@@ -141,8 +155,7 @@ public class IntentGenerator {
     }
   }
 
-  private static Intent intentToIntentProtobuf(UseCase.Intent intent,
-    Map<String, String> intentDisplayNameToName, String projectID) {
+  private static Intent buildIntentProtobufForIntent(UseCase.Intent intent, String projectID) {
     Intent.Builder intentProtobufBuilder = Intent.newBuilder();
     intentProtobufBuilder.setDisplayName(intent.getIntentName());        
     // output contexts need to be set to the input contexts of the successor intents
@@ -158,25 +171,6 @@ public class IntentGenerator {
       intentProtobufBuilder.setName(intentDisplayNameToName.get(intent.getIntentName()));
     }
     return intentProtobufBuilder.build();
-  }
-
-  private static Options defineOptions() {
-    Options options = new Options();
-    final Option useCaseFile = Option.builder("f").hasArg()
-        .desc("prototxt file describing the use case" ).build();
-    options.addOption(useCaseFile);
-    return options;
-  }
-  
-  private static String getUseCaseFile(String [] args) throws ParseException {
-    final Options options = defineOptions();
-    final CommandLineParser parser = new DefaultParser();
-    final CommandLine cmd = parser.parse(options, args);
-    final String fileName = cmd.getOptionValue("f");
-    if(fileName.equals("")) {
-      throw new ParseException("No file name provided");
-    }
-    return fileName;
   }
 
   private static Map<String, String> getIntentDisplayNametoNameMapping(

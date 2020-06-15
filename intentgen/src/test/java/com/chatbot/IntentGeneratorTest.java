@@ -12,7 +12,7 @@ public class IntentGeneratorTest
   @Test
   public void testTrainingPhraseDecodingWithNoEntity() {
     String trainingStringWithNoEntities = "This is a training phrase with no entities";
-    TrainingPhrase trainingPhrase = IntentGenerator.encodedStringToTrainingPhrase(
+    TrainingPhrase trainingPhrase = IntentGenerator.buildTrainingPhraseFromEncodedString(
         trainingStringWithNoEntities);
     assertTrue(trainingPhrase.getPartsCount() == 1 
         && trainingPhrase.getParts(0).getText().equals(trainingStringWithNoEntities));
@@ -21,7 +21,7 @@ public class IntentGeneratorTest
   @Test
   public void testTrainingPhraseDecodingWithEntity() {
     String trainingStringWithEntity = "He lives in |@sys.country;country;Peru|";
-    TrainingPhrase trainingPhrase = IntentGenerator.encodedStringToTrainingPhrase(
+    TrainingPhrase trainingPhrase = IntentGenerator.buildTrainingPhraseFromEncodedString(
         trainingStringWithEntity);
     String textPart = trainingPhrase.getParts(0).getText();
     Part EntityPart = trainingPhrase.getParts(1);
