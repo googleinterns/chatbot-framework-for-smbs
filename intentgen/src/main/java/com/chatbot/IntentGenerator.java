@@ -40,7 +40,6 @@ public class IntentGenerator {
   private static final int VALUE_INDEX = 2;
   private static Map<String, String> intentDisplayNameToName;
   private static String projectID;
-  IntentsClient intentsClient;
 
   public static void main(final String[] args) throws ParseException, IllegalArgumentException,
       IOException {
