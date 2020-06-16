@@ -1,10 +1,8 @@
 package com.chatbot;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -13,12 +11,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.chatbot.protobuf.UseCaseOuterClass.UseCase;
-import com.google.cloud.dialogflow.v2.Intent;
 import com.google.cloud.dialogflow.v2.Context;
+import com.google.cloud.dialogflow.v2.Intent;
 import com.google.cloud.dialogflow.v2.Intent.TrainingPhrase;
 import com.google.cloud.dialogflow.v2.Intent.TrainingPhrase.Part;
 import com.google.cloud.dialogflow.v2.IntentsClient;
 import com.google.cloud.dialogflow.v2.ProjectAgentName;
+import com.google.common.base.Charsets;
+import com.google.common.io.CharStreams;
 import com.google.protobuf.TextFormat;
 
 import org.apache.commons.cli.CommandLine;
@@ -39,8 +39,11 @@ public class IntentGenerator {
   private static final int ALIAS_INDEX = 1;
   private static final int VALUE_INDEX = 2;
   private static Map<String, String> intentDisplayNameToName;
+  private static String projectID;
+  IntentsClient intentsClient;
 
-  public static void main(final String[] args) throws ParseException, IllegalArgumentException {
+  public static void main(final String[] args) throws ParseException, IllegalArgumentException,
+      IOException {
     Options options = new Options();
     final Option useCaseFile = Option.builder("f").hasArg()
         .desc("prototxt file describing the use case" ).build();
@@ -51,24 +54,23 @@ public class IntentGenerator {
     if(fileName.isEmpty()) {
       throw new IllegalArgumentException("No file name provided");
     }
-    final String projectID = System.getenv("projectID");
+    projectID = System.getenv("projectID");
     final ProjectAgentName parent = ProjectAgentName.of(projectID);
     try(IntentsClient intentsClient = IntentsClient.create()) {
       // this map is needed to check if an intent display name already exists and if so, instead of 
       // creating an intent (which would return an error) we update the intent using the name
-      intentDisplayNameToName = getIntentDisplayNametoNameMapping(intentsClient, parent);
+      generateIntentDisplayNametoNameMapping(intentsClient, parent);
       final List<Intent> intentProtobufList = getIntentsInUseCase(fileName).stream()
           .map(x->buildIntentProtobufForIntent(x, projectID))
           .collect(Collectors.toList());
-      createOrUpdateIntents(intentProtobufList, intentsClient, intentDisplayNameToName, parent);
-    } catch (Exception e) {
-      e.printStackTrace();
+      createOrUpdateIntents(intentProtobufList, intentsClient, parent);
     }
   }
 
   // To include entities into strings the syntax used is: |entity-type;alias;value|
   // A valid string would be "some text |@sys.name;name;Foo| some text"
-  public static TrainingPhrase buildTrainingPhraseFromEncodedString(String trainingPhrase) {
+  static TrainingPhrase buildTrainingPhraseFromEncodedString(String trainingPhrase)
+      throws IllegalArgumentException {
     TrainingPhrase.Builder trainingPhraseProtobufBuilder = TrainingPhrase.newBuilder();
     final String[] trainingPhraseParts = trainingPhrase.split("\\|");
     List<Part> partProtobufList = new ArrayList<Part>();
@@ -77,6 +79,9 @@ public class IntentGenerator {
       // semicolon implies that this part is an entity
       if(part.indexOf(";") != -1) {
         final String[] entityParts = part.split(";");
+        if(entityParts.length != 3) {
+          throw new IllegalArgumentException("Incorrect entity encoding in training string");
+        }
         partProtobuf = Part.newBuilder()
         .setEntityType(entityParts[ENTITY_TYPE_INDEX])
         .setAlias(entityParts[ALIAS_INDEX])
@@ -87,16 +92,18 @@ public class IntentGenerator {
       }
       partProtobufList.add(partProtobuf);
     }
-    trainingPhraseProtobufBuilder.addAllParts(partProtobufList);
-    return trainingPhraseProtobufBuilder.build();
+    return trainingPhraseProtobufBuilder.addAllParts(partProtobufList).build();
   }
   
-  private static List<UseCase.Intent> getIntentsInUseCase(String filename) throws IOException {
-    final Path useCaseFilePath = Paths.get(filename);
-    String fileContent = "";
-    fileContent = Files.readString(useCaseFilePath, StandardCharsets.US_ASCII);
+  static List<UseCase.Intent> getIntentsInUseCase(String filename) throws IOException,
+      IllegalArgumentException, NullPointerException {
+    InputStream inputStream = IntentGenerator.class.getResourceAsStream("/" + filename);
+    String fileContent = CharStreams.toString(new InputStreamReader(
+      inputStream, Charsets.UTF_8));
+    if(fileContent.isEmpty()) {
+      throw new IllegalArgumentException("File provided is empty");
+    }
     final UseCase.Builder useCaseBuilder = UseCase.newBuilder();
-    // the use case file is a proto text file, so it is parsed using the textformat parser
     final TextFormat.Parser textFromatParser = TextFormat.getParser();
     textFromatParser.merge(fileContent, useCaseBuilder);
     return useCaseBuilder.build().getIntentsList();
@@ -143,8 +150,7 @@ public class IntentGenerator {
   }
 
   private static void createOrUpdateIntents(List<Intent> intentProtobufList,
-    IntentsClient intentsClient, Map<String, String> intentDisplayNameToName,
-    ProjectAgentName parent) {
+      IntentsClient intentsClient, ProjectAgentName parent) {
     for(Intent intent: intentProtobufList) {
       if(intentDisplayNameToName.containsKey(intent.getDisplayName())) {
         intentsClient.updateIntent(intent, "en");
@@ -173,12 +179,11 @@ public class IntentGenerator {
     return intentProtobufBuilder.build();
   }
 
-  private static Map<String, String> getIntentDisplayNametoNameMapping(
+  private static void generateIntentDisplayNametoNameMapping(
         IntentsClient intentsClient, ProjectAgentName parent) {
-    Map<String, String> intentDisplayNameToName = new HashMap<String, String>();
+    intentDisplayNameToName = new HashMap<String, String>();
     for (Intent intent : intentsClient.listIntents(parent).iterateAll()) {
       intentDisplayNameToName.put(intent.getDisplayName(), intent.getName());
     }
-    return intentDisplayNameToName;
   }
 }

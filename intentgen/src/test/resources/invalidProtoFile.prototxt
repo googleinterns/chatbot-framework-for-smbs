@@ -1,0 +1,3 @@
+intents {
+  intent_name="newIntent"
+}
