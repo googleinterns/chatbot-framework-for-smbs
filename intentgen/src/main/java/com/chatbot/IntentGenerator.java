@@ -29,18 +29,18 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 public class IntentGenerator {
-  static final List<String> YES_TRAINING_PHRASES = new ArrayList<String>(Arrays.asList("yes",
+  private static final List<String> YES_TRAINING_PHRASES = new ArrayList<String>(Arrays.asList("yes",
       "okay I will", "why not", "yes that's alright", "yes I do", "exactly", "of course",
       "yep that's ok", "okay", "ok", "sure"));
-  static final List<String> NO_TRAINING_PHRASES = new ArrayList<String>(Arrays.asList("No",
+  private static final List<String> NO_TRAINING_PHRASES = new ArrayList<String>(Arrays.asList("No",
       "thanks but no", "no way", "no no don't", "na", "no it isn't", "don't", "nah I'm good",
       "no I cannot", "I can't"));
-  static final int ENTITY_TYPE_INDEX = 0;
-  static final int ALIAS_INDEX = 1;
-  static final int VALUE_INDEX = 2;
+  private static final int ENTITY_TYPE_INDEX = 0;
+  private static final int ALIAS_INDEX = 1;
+  private static final int VALUE_INDEX = 2;
   private static Map<String, String> intentDisplayNameToName;
 
-  public static void main(final String[] args) throws ParseException {
+  public static void main(final String[] args) throws ParseException, IllegalArgumentException {
     Options options = new Options();
     final Option useCaseFile = Option.builder("f").hasArg()
         .desc("prototxt file describing the use case" ).build();
@@ -49,7 +49,7 @@ public class IntentGenerator {
     final CommandLine cmd = parser.parse(options, args);
     final String fileName = cmd.getOptionValue("f");
     if(fileName.isEmpty()) {
-      throw new ParseException("No file name provided");
+      throw new IllegalArgumentException("No file name provided");
     }
     final String projectID = System.getenv("projectID");
     final ProjectAgentName parent = ProjectAgentName.of(projectID);
