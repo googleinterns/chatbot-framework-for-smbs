@@ -9,7 +9,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class ChatServices {
 
-  public static void main(String[] args) throws IOException, InterruptedException, TimeoutException {
+  public static void main(String[] args)
+      throws IOException, InterruptedException, TimeoutException {
     SpringApplication.run(ChatServices.class, args);
   }
 }

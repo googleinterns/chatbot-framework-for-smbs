@@ -18,15 +18,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class HangoutsMessageSender {
   
-  private String CHAT_SCOPE;
-  private GoogleCredentials credentials;
-  private HttpRequestInitializer requestInitializer;
-  private HangoutsChat chatService;
+  private static String CHAT_SCOPE;
+  private static GoogleCredentials credentials;
+  private static HttpRequestInitializer requestInitializer;
+  private static HangoutsChat chatService;
 
   public HangoutsMessageSender(@Value("${hangoutsAPIScope}") String apiScope,
       @Value("${credentialsFile}") String credentialsFile) throws GeneralSecurityException,
       IOException {
-    this.CHAT_SCOPE = apiScope;
+    CHAT_SCOPE = apiScope;
     credentials = GoogleCredentials.fromStream(
         HangoutsMessageSender.class.getResourceAsStream(credentialsFile))
         .createScoped(CHAT_SCOPE);

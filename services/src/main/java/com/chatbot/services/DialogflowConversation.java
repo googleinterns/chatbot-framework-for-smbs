@@ -20,8 +20,8 @@ import java.util.List;
 public class DialogflowConversation {
 
   private static String projectID;
-  private static String langCode;
-  private static String sessionID;
+  private String langCode;
+  private String sessionID;
 
   public DialogflowConversation(String projectIDToSet, String langCodeToSet, String sessionIDToSet) {
     projectID = projectIDToSet;

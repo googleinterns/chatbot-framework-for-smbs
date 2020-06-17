@@ -18,13 +18,12 @@ import com.google.pubsub.v1.PubsubMessage;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
-@Component
-public class PubSubConsumer {
+// Annotating this class with @Component will launch the pull subscriber on application start up
+public class PubSubPullSubscriber {
 
   @Autowired
-  private AsyncService asyncService;
+  private static AsyncService asyncService;
   private static String projectID;
   private static String subscriptionID;
   private static final String TRIGGER_EVENT_MESSAGE = "TriggerEvent";
@@ -33,10 +32,11 @@ public class PubSubConsumer {
   private static Long maxOutstandingElements;
   private static Long maxOutstandingBytes;
 
-  public PubSubConsumer(
+  public PubSubPullSubscriber(
       @Value("${pubsubConfig.maxOutstandingElements}") final String maxOutstandingElementsToSet,
       @Value("${pubsubConfig.maxOutstandingBytes}") final String maxOutstandingBytesToSet)
       throws InterruptedException {
+    System.out.println("Constructor Running!");
     projectID = System.getenv("projectID");
     subscriptionID = System.getenv("subscriptionID");
     maxOutstandingElements = Long.parseLong(maxOutstandingElementsToSet);
@@ -48,7 +48,8 @@ public class PubSubConsumer {
       throws InterruptedException, IllegalArgumentException {
     final ProjectSubscriptionName subscriptionName = ProjectSubscriptionName
         .of(projectID, subscriptionID);
-    final MessageReceiver receiver = (final PubsubMessage message, final AckReplyConsumer consumer) -> {
+    final MessageReceiver receiver =
+        (final PubsubMessage message, final AckReplyConsumer consumer) -> {
       final String messageData = message.getData().toStringUtf8();
       final Map<String, String> messageAttributesMap = message.getAttributesMap();
       if(messageData.equals(TRIGGER_EVENT_MESSAGE)) {
@@ -88,8 +89,7 @@ public class PubSubConsumer {
       throw new IllegalArgumentException("No userID provided in published message");
     }
     if(messageAttributesMap.containsKey("chatClient")) {
-      final String chatClient = messageAttributesMap.get("chatClient");
-      switch (chatClient) {
+      switch (messageAttributesMap.get("chatClient")) {
         case "HANGOUTS":
           triggerEventNotificationBuilder.setChatClient(ChatClient.HANGOUTS);
           break;
@@ -103,12 +103,12 @@ public class PubSubConsumer {
       throw new IllegalArgumentException("No chat client provided in published message");
     } 
     if(messageAttributesMap.containsKey("event")) {
-      final String event = messageAttributesMap.get("event");
-      switch (event) {
+      switch (messageAttributesMap.get("event")) {
         case SUGGEST_CATEGORY_CHANGE_EVENT:
           final com.google.protobuf.Value suggestedCategory = com.google.protobuf.Value.newBuilder()
-          .setStringValue(messageAttributesMap.get("suggestedCategory")).build();
-          final Struct eventParams = Struct.newBuilder().putFields("suggestedCategory", suggestedCategory).build();
+              .setStringValue(messageAttributesMap.get("suggestedCategory")).build();
+          final Struct eventParams =
+              Struct.newBuilder().putFields("suggestedCategory", suggestedCategory).build();
           triggerEventNotificationBuilder
               .setEvent(Event.SUGGEST_CATEGORY_CHANGE).setEventParams(eventParams);
           break;

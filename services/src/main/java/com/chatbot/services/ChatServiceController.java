@@ -1,9 +1,18 @@
 package com.chatbot.services;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.googleapis.auth.oauth2.GooglePublicKeysManager;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,19 +34,39 @@ public class ChatServiceController {
   private static final String REMOVED_FROM_SPACE_EVENT = "REMOVED_FROM_SPACE";
   private static final String ADDED_TO_SPACE_EVENT = "ADDED_TO_SPACE";
   private static final String MESSAGE_EVENT = "MESSAGE";
+  private static final String CHAT_ISSUER = "chat@system.gserviceaccount.com";
+  private static final String PUBLIC_CERT_URL_PREFIX =
+      "https://www.googleapis.com/service_accounts/v1/metadata/x509/";
+  private static final String AUDIENCE = System.getenv("projectNumber");
 
   @PostMapping("/")
-  public String onRequest(@RequestHeader final Map<String, String> headers, @RequestBody final JsonNode event) {
-    final String userAgent = headers.get("user-agent");
-    if (userAgent.equals(HANGOUTS_USER_AGENT)) {
+  public String onRequest(@RequestHeader final Map<String, String> headers,
+      @RequestBody final JsonNode event) throws IOException, GeneralSecurityException {
+    if (headers.get("user-agent").equals(HANGOUTS_USER_AGENT)) {
+      final String BEARER_TOKEN = headers.get("authorization").split(" ")[1];
+      final JacksonFactory factory = new JacksonFactory();
+      final GooglePublicKeysManager.Builder keyManagerBuilder = new GooglePublicKeysManager.Builder(
+          new NetHttpTransport(), factory);
+      final String certUrl = PUBLIC_CERT_URL_PREFIX + CHAT_ISSUER;
+      keyManagerBuilder.setPublicCertsEncodedUrl(certUrl);
+      final GoogleIdTokenVerifier.Builder verifierBuilder = new GoogleIdTokenVerifier.Builder(
+          keyManagerBuilder.build());
+      verifierBuilder.setIssuer(CHAT_ISSUER);
+      final GoogleIdTokenVerifier verifier = verifierBuilder.build();
+      final GoogleIdToken idToken = GoogleIdToken.parse(factory, BEARER_TOKEN);
+      if (idToken == null) {
+        throw new IllegalArgumentException("Token cannot be parsed");
+      }
+      if (!verifier.verify(idToken) || !idToken.verifyAudience(Collections.singletonList(AUDIENCE))
+          || !idToken.verifyIssuer(CHAT_ISSUER)) {
+        throw new IllegalArgumentException("Invalid token");
+      }
       try {
         asyncService.hangoutsAsyncHandler(parseHangoutsRequest(event));
       } catch (final Exception e) {
         // If there was an error in parsing the request, either we do not support the
-        // type of
-        // request or the format of the request is incorrect, in both these cases
-        // returning an empty
-        // string is an option.
+        // type of request or the format of the request is incorrect, in both these cases
+        // returning an empty string is an option.
         e.printStackTrace();
       }
     } else {
@@ -74,7 +103,8 @@ public class ChatServiceController {
 
   private ChatServiceRequest.Builder parseHangoutsUserMessage(
       final ChatServiceRequest.Builder chatServiceRequestBuilder, final JsonNode event) {
-    final ChatServiceRequest.UserMessage.Builder userMessageBuilder = ChatServiceRequest.UserMessage.newBuilder();
+    final ChatServiceRequest.UserMessage.Builder userMessageBuilder =
+        ChatServiceRequest.UserMessage.newBuilder();
     if (event.at("/message").has("attachment")) {
       if (event.at("/message").has("argumentText")) {
         userMessageBuilder.setText(event.at("/message/argumentText").asText());
@@ -82,7 +112,8 @@ public class ChatServiceController {
       final Iterator<JsonNode> attachmentIterator = event.at("/message/attachment").elements();
       while (attachmentIterator.hasNext()) {
         final JsonNode attachment = (JsonNode) attachmentIterator.next();
-        final ChatServiceRequest.Attachment.Builder attachmentBuilder = ChatServiceRequest.Attachment.newBuilder();
+        final ChatServiceRequest.Attachment.Builder attachmentBuilder =
+            ChatServiceRequest.Attachment.newBuilder();
         attachmentBuilder.setLink(attachment.at("/downloadUri").asText());
         switch (attachment.at("/contentType").asText()) {
           case "image/png":
@@ -103,14 +134,13 @@ public class ChatServiceController {
     return chatServiceRequestBuilder;
   }
 
-  private ChatServiceRequest.Builder parseHangoutsSender(final ChatServiceRequest.Builder chatServiceRequestBuilder,
-      final JsonNode event) {
+  private ChatServiceRequest.Builder parseHangoutsSender(
+        final ChatServiceRequest.Builder chatServiceRequestBuilder, final JsonNode event) {
     final ChatServiceRequest.Sender.Builder senderBuilder = ChatServiceRequest.Sender.newBuilder();
     senderBuilder.setDisplayName(event.at("/user/displayName").asText())
         .setChatClientGeneratedId(event.at("/space/name").asText().substring(7))
         .setUserId(event.at("/user/name").asText().substring(6));
     chatServiceRequestBuilder.setSender(senderBuilder); 
     return chatServiceRequestBuilder;
-
   }
 }

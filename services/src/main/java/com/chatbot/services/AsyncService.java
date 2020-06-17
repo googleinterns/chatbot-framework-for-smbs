@@ -19,7 +19,7 @@ public class AsyncService {
   @Autowired
   private HangoutsMessageSender hangoutsMessageSender;
   @Autowired
-  private IDMapping iDMapping;
+  private static IDMapping iDMapping;
   private static final String IMAGES_RECEIVED_MESSAGE = "The images have been received!";
   private static final String THANKS_FOR_ADDING_MESSAGE = "Thank You for Adding me";
   private static final String NOT_EXPECTING_IMAGE_MESSAGE =
@@ -39,22 +39,25 @@ public class AsyncService {
         break;
       case MESSAGE:
         // The spaceID of the user is used as the sessionID for hangouts
-        final DialogflowConversation dialogflowConversation = new DialogflowConversation(System.getenv("projectID"),
-            spaceID);
+        final DialogflowConversation dialogflowConversation =
+            new DialogflowConversation(System.getenv("projectID"), spaceID);
         if (chatServiceRequest.getUserMessage().getAttachmentsCount() == 0) {
-          final Value userID = Value.newBuilder().setStringValue(chatServiceRequest.getSender().getUserId()).build();
+          final Value userID = Value.newBuilder().setStringValue(chatServiceRequest.getSender()
+              .getUserId()).build();
           final Struct payload = Struct.newBuilder().putFields("userID", userID).build();
-          final String response = dialogflowConversation.sendMessage(chatServiceRequest.getUserMessage().getText(),
+          final String response = dialogflowConversation
+              .sendMessage(chatServiceRequest.getUserMessage().getText(),
               payload);
           hangoutsMessageSender.sendMessage(spaceID, response);
         } else {
           final List<String> currentContextList = dialogflowConversation.getCurrentContexts();
           if (currentContextList.contains(EXPECTING_IMAGES_CONTEXT)) {
             // send images to backend
-            hangoutsMessageSender.sendMessage(chatServiceRequest.getSender().getChatClientGeneratedId(),
-                IMAGES_RECEIVED_MESSAGE);
+            hangoutsMessageSender.sendMessage(
+              chatServiceRequest.getSender().getChatClientGeneratedId(), IMAGES_RECEIVED_MESSAGE);
           } else {
-            hangoutsMessageSender.sendMessage(chatServiceRequest.getSender().getChatClientGeneratedId(),
+            hangoutsMessageSender
+                .sendMessage(chatServiceRequest.getSender().getChatClientGeneratedId(),
                 NOT_EXPECTING_IMAGE_MESSAGE);
           }
         }
@@ -65,14 +68,16 @@ public class AsyncService {
   }
 
   @Async("asyncExecutor")
-  public void sendMessageUsingUserID(final String userID, final String message, final ChatClient chatClient)
-      throws IOException {
+  public void sendMessageUsingUserID(final String userID, final String message,
+      final ChatClient chatClient) throws IOException {
     switch (chatClient) {
       case HANGOUTS:
-        hangoutsMessageSender.sendMessage(iDMapping.getChatClientGeneratedID(userID, ChatClient.HANGOUTS), message);
+        hangoutsMessageSender
+            .sendMessage(iDMapping.getChatClientGeneratedID(userID,ChatClient.HANGOUTS), message);
         break;
       case WHATSAPP:
-        hangoutsMessageSender.sendMessage(iDMapping.getChatClientGeneratedID(userID, ChatClient.WHATSAPP), message);
+        hangoutsMessageSender
+            .sendMessage(iDMapping.getChatClientGeneratedID(userID, ChatClient.WHATSAPP), message);
         break;
       default:
         throw new IllegalArgumentException("Unknown chat client found");
@@ -80,8 +85,8 @@ public class AsyncService {
   }
 
   @Async
-  public void sendMessageUsingChatClientGeneratedID(final String chatClientGeneratedID, final String message,
-      final ChatClient chatClient) throws IOException {
+  public void sendMessageUsingChatClientGeneratedID(final String chatClientGeneratedID,
+      final String message, final ChatClient chatClient) throws IOException {
     switch (chatClient) {
       case HANGOUTS:
         hangoutsMessageSender.sendMessage(chatClientGeneratedID, message);
@@ -94,15 +99,18 @@ public class AsyncService {
   }
 
   @Async
-  public void triggerEventHandler(final TriggerEventNotification triggerEventNotification) throws IOException {
-    final ChatClient chatClient = ChatClient.valueOf(triggerEventNotification.getChatClient().name());
+  public void triggerEventHandler(final TriggerEventNotification triggerEventNotification)
+      throws IOException {
+    final ChatClient chatClient =
+        ChatClient.valueOf(triggerEventNotification.getChatClient().name());
     final String userID = triggerEventNotification.getUserID();
     final String chatClientGeneratedID = iDMapping.getChatClientGeneratedID(userID, chatClient);
-    final DialogflowConversation dialogflowConversation = new DialogflowConversation(System.getenv("projectID"),
-        chatClientGeneratedID);
+    final DialogflowConversation dialogflowConversation =
+        new DialogflowConversation(System.getenv("projectID"), chatClientGeneratedID);
     final Value userIDValue = Value.newBuilder().setStringValue(userID).build();
     final Struct payload = Struct.newBuilder().putFields("userID", userIDValue).build();
-    final String triggerResponse = dialogflowConversation.triggerEvent(triggerEventNotification.getEvent().name(),
+    final String triggerResponse = dialogflowConversation
+        .triggerEvent(triggerEventNotification.getEvent().name(),
         triggerEventNotification.getEventParams(), payload);
     sendMessageUsingChatClientGeneratedID(chatClientGeneratedID, triggerResponse, chatClient);
   }
