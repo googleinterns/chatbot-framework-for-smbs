@@ -23,8 +23,8 @@ public class HangoutsMessageSender {
   private static HttpRequestInitializer requestInitializer;
   private static HangoutsChat chatService;
 
-  public HangoutsMessageSender(@Value("${hangoutsAPIScope}") String apiScope,
-      @Value("${credentialsFile}") String credentialsFile) throws GeneralSecurityException,
+  public HangoutsMessageSender(@Value("${hangoutsAPIScope}") final String apiScope,
+      @Value("${credentialsFile}") final String credentialsFile) throws GeneralSecurityException,
       IOException {
     CHAT_SCOPE = apiScope;
     credentials = GoogleCredentials.fromStream(
@@ -37,8 +37,8 @@ public class HangoutsMessageSender {
         .setApplicationName("chatbot").build();
   }
 
-  public void sendMessage(String spaceID, String msg) throws IOException {
-    Message message = new Message().setText(msg);
+  public void sendMessage(final String spaceID, final String msg) throws IOException {
+    final Message message = new Message().setText(msg);
     chatService.spaces().messages().create("spaces/" + spaceID, message).execute();
   }
 }

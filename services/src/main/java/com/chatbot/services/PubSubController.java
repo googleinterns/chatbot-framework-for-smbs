@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class PubSubController {
 
   @Autowired
-  private static AsyncService asyncService;
+  private AsyncService asyncService;
   private static final String TRIGGER_EVENT_MESSAGE = "TriggerEvent";
   private static final String SUGGEST_CATEGORY_CHANGE_EVENT = "SUGGEST_CATEGORY_CHANGE";
   private static final String SUGGEST_IMAGE_UPLOAD_EVENT = "SUGGEST_IMAGE_UPLOAD";
@@ -42,7 +42,6 @@ public class PubSubController {
         || authorizationHeader.split(" ").length != 2) {
       throw new IllegalArgumentException("Bad Request");
     }
-    System.out.println(authorizationHeader.split(" ")[1]);
     if(verifier.verify(authorizationHeader.split(" ")[1]) == null) {
       throw new IllegalArgumentException("Invalid ID token in request");
     }

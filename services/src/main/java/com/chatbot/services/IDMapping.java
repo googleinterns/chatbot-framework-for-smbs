@@ -24,7 +24,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class IDMapping {
 
-
   private static String CHAT_SCOPE;
   private static Map<ChatClient, BiMap<String, String>> ChatClientToChatClientBiMapMapping;
   private static final String SERVICE_ACCOUNT_FILE = "/service-acct.json";

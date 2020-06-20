@@ -19,12 +19,12 @@ public class AsyncService {
   @Autowired
   private HangoutsMessageSender hangoutsMessageSender;
   @Autowired
-  private static IDMapping iDMapping;
+  private IDMapping iDMapping;
   private static final String IMAGES_RECEIVED_MESSAGE = "The images have been received!";
   private static final String THANKS_FOR_ADDING_MESSAGE = "Thank You for Adding me";
   private static final String NOT_EXPECTING_IMAGE_MESSAGE =
       "Sorry, we were not expecting any attachements from you.";
-  private static final String EXPECTING_IMAGES_CONTEXT = "ExpectingImagesContext";
+  private static final String EXPECTING_IMAGES_CONTEXT = "expectingimagescontext";
 
   @Async("asyncExecutor")
   public void hangoutsAsyncHandler(final ChatServiceRequest chatServiceRequest) throws Exception {

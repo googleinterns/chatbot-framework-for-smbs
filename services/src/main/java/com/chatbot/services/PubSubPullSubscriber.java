@@ -23,7 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 public class PubSubPullSubscriber {
 
   @Autowired
-  private static AsyncService asyncService;
+  private AsyncService asyncService;
   private static String projectID;
   private static String subscriptionID;
   private static final String TRIGGER_EVENT_MESSAGE = "TriggerEvent";
@@ -36,7 +36,6 @@ public class PubSubPullSubscriber {
       @Value("${pubsubConfig.maxOutstandingElements}") final String maxOutstandingElementsToSet,
       @Value("${pubsubConfig.maxOutstandingBytes}") final String maxOutstandingBytesToSet)
       throws InterruptedException {
-    System.out.println("Constructor Running!");
     projectID = System.getenv("projectID");
     subscriptionID = System.getenv("subscriptionID");
     maxOutstandingElements = Long.parseLong(maxOutstandingElementsToSet);
