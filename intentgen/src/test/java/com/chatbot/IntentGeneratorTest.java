@@ -36,7 +36,7 @@ public class IntentGeneratorTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testIncorrectEntityEncodgin() throws IllegalArgumentException {
+  public void testIncorrectEntityEncoding() throws IllegalArgumentException {
     String trainingStringWithEntity = "He lives in |@sys.country;country;Peru;Argentina|";
     IntentGenerator.buildTrainingPhraseFromEncodedString(trainingStringWithEntity);
   }
