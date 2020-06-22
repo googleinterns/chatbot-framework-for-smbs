@@ -38,6 +38,9 @@ public class HangoutsMessageSender {
   }
 
   public void sendMessage(final String spaceID, final String msg) throws IOException {
+    if(msg.isEmpty()) {
+      return;
+    }
     final Message message = new Message().setText(msg);
     chatService.spaces().messages().create("spaces/" + spaceID, message).execute();
   }

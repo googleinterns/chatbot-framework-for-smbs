@@ -21,6 +21,11 @@ public class DialogflowFulfillmentController {
   @Autowired
   private AsyncService asyncService;
 
+  private static final String PROVIDE_TARGETED_QUERIES_INTENT_NAME = "ProvideTargetedQueries";
+  private static final String RECOMMEND_MORE_OPTIONS_INTENT_NAME = "RecommendMoreOptions";
+  private static final String CHANGE_CATEGORY_INTENT_NAME = "ChangeCategory";
+  private static final String EXPLAIN_MEANING_INTENT_NAME = "ExplainMeaning";
+
   @PostMapping("/dgf")
   public String onEvent(@RequestHeader final Map<String, String> headers,
       @RequestBody final JsonNode event) throws JsonParseException, IOException,
@@ -38,10 +43,25 @@ public class DialogflowFulfillmentController {
       parameterMap.put(paramName, parameters.get(paramName).asText());
     }
     switch (intentName) {
-      case "ChangeCategory":
+      case CHANGE_CATEGORY_INTENT_NAME:
         // change the category to paramMap.get("suggestedCategory") for userID
         asyncService.sendMessageUsingUserID(userID, buildCategoryChangedMessage(parameterMap
             .get("suggestedCategory")), ChatClient.HANGOUTS);
+        break;
+      case RECOMMEND_MORE_OPTIONS_INTENT_NAME:
+        // get all alternatives for the userID
+        asyncService.sendMessageUsingUserID(userID, buildRecommendMoreOptionsMessage(),
+            ChatClient.HANGOUTS);
+        break;
+      case PROVIDE_TARGETED_QUERIES_INTENT_NAME:
+        // get targeted queries for the paramMap.get("suggestedCategory")
+        asyncService.sendMessageUsingUserID(userID, buildTargetedQueriesMessage(),
+            ChatClient.HANGOUTS);
+        break;
+      case EXPLAIN_MEANING_INTENT_NAME:
+        // get information about the category paramMap.get("suggestedCategory")
+        asyncService.sendMessageUsingUserID(userID, buildExplainMeaningMessage(),
+            ChatClient.HANGOUTS);
     }
     // an empty string is returned so that the responses added to the dialogflow
     // console are
@@ -49,7 +69,19 @@ public class DialogflowFulfillmentController {
     return "";
   }
 
-  private String buildCategoryChangedMessage(final String suggestedCategory) {
+  private static String buildCategoryChangedMessage(final String suggestedCategory) {
     return "Your category has been changed to " + suggestedCategory;
+  }
+
+  private static String buildRecommendMoreOptionsMessage() {
+    return "You can also change your category to A, B or C";
+  }
+
+  private static String buildTargetedQueriesMessage() {
+    return "These are some targeted queries for the category";
+  }
+
+  private static String buildExplainMeaningMessage() {
+    return "This is some information about the category";
   }
 }
