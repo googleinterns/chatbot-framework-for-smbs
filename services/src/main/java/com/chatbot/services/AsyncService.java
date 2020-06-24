@@ -1,11 +1,14 @@
 package com.chatbot.services;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.chatbot.services.protobuf.ChatServiceRequestOuterClass.ChatServiceRequest;
 import com.chatbot.services.protobuf.ChatServiceRequestOuterClass.ChatServiceRequest.ChatClient;
 import com.chatbot.services.protobuf.TriggerEventNotificationOuterClass.TriggerEventNotification;
+import com.google.cloud.dialogflow.v2.QueryResult;
 import com.google.protobuf.Struct;
 import com.google.protobuf.Value;
 
@@ -25,6 +28,9 @@ public class AsyncService {
   private static final String NOT_EXPECTING_IMAGE_MESSAGE =
       "Sorry, we were not expecting any attachements from you.";
   private static final String EXPECTING_IMAGES_CONTEXT = "expectingimagescontext";
+  private static final List<String> LIST_OF_INTENTS_WITH_INTERACTIVE_RESPONSE = new ArrayList<>(
+    Arrays.asList("Default Welcome Intent", "Default Fallback Intent")
+  );
 
   @Async("asyncExecutor")
   public void hangoutsAsyncHandler(final ChatServiceRequest chatServiceRequest) throws Exception {
@@ -45,10 +51,16 @@ public class AsyncService {
           final Value userID = Value.newBuilder().setStringValue(chatServiceRequest.getSender()
               .getUserId()).build();
           final Struct payload = Struct.newBuilder().putFields("userID", userID).build();
-          final String response = dialogflowConversation
+          final QueryResult queryResult = dialogflowConversation
               .sendMessage(chatServiceRequest.getUserMessage().getText(),
-              payload);
-          hangoutsMessageSender.sendMessage(spaceID, response);
+               payload);
+          final String response = queryResult.getFulfillmentText();
+          if(LIST_OF_INTENTS_WITH_INTERACTIVE_RESPONSE
+              .contains(queryResult.getIntent().getDisplayName())) {
+            hangoutsMessageSender.sendCardMessage(spaceID, response);  
+          } else {
+            hangoutsMessageSender.sendMessage(spaceID, response);
+          }
         } else {
           final List<String> currentContextList = dialogflowConversation.getCurrentContexts();
           if (currentContextList.contains(EXPECTING_IMAGES_CONTEXT)) {
@@ -100,7 +112,7 @@ public class AsyncService {
 
   @Async
   public void triggerEventHandler(final TriggerEventNotification triggerEventNotification)
-      throws IOException {
+      throws Exception {
     final ChatClient chatClient =
         ChatClient.valueOf(triggerEventNotification.getChatClient().name());
     final String userID = triggerEventNotification.getUserID();

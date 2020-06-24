@@ -25,6 +25,9 @@ public class DialogflowFulfillmentController {
   private static final String RECOMMEND_MORE_OPTIONS_INTENT_NAME = "RecommendMoreOptions";
   private static final String CHANGE_CATEGORY_INTENT_NAME = "ChangeCategory";
   private static final String EXPLAIN_MEANING_INTENT_NAME = "ExplainMeaning";
+  private static final String UNRELATED_CALL_INTENT = "CallUnrelatedToBusinessCategory";
+  private static final String CALL_FROM_OUTSIDE_SERVICE_AREA_INTENT = 
+      "CallFromOutsideServiceArea";
 
   @PostMapping("/dgf")
   public String onEvent(@RequestHeader final Map<String, String> headers,
@@ -55,17 +58,24 @@ public class DialogflowFulfillmentController {
         break;
       case PROVIDE_TARGETED_QUERIES_INTENT_NAME:
         // get targeted queries for the paramMap.get("suggestedCategory")
-        asyncService.sendMessageUsingUserID(userID, buildTargetedQueriesMessage(),
-            ChatClient.HANGOUTS);
+        asyncService.sendMessageUsingUserID(userID, buildTargetedQueriesMessage(parameterMap
+            .get("suggestedCategory")), ChatClient.HANGOUTS);
         break;
       case EXPLAIN_MEANING_INTENT_NAME:
         // get information about the category paramMap.get("suggestedCategory")
-        asyncService.sendMessageUsingUserID(userID, buildExplainMeaningMessage(),
-            ChatClient.HANGOUTS);
+        asyncService.sendMessageUsingUserID(userID, buildExplainMeaningMessage(parameterMap
+            .get("suggestedCategory")), ChatClient.HANGOUTS);
+      case CALL_FROM_OUTSIDE_SERVICE_AREA_INTENT:
+        // parameterMap.get("mobileNumber")) was from outside of the service area of userID
+        break;
+      case UNRELATED_CALL_INTENT:
+        //  parameterMap.get("mobileNumber")) was unrelated for userID
+        break;
+      default:
+        break;
     }
     // an empty string is returned so that the responses added to the dialogflow
-    // console are
-    // used
+    // console are used
     return "";
   }
 
@@ -77,11 +87,11 @@ public class DialogflowFulfillmentController {
     return "You can also change your category to A, B or C";
   }
 
-  private static String buildTargetedQueriesMessage() {
-    return "These are some targeted queries for the category";
+  private static String buildTargetedQueriesMessage(final String suggestedCategory) {
+    return "These are some targeted queries for" + suggestedCategory;
   }
 
-  private static String buildExplainMeaningMessage() {
-    return "This is some information about the category";
+  private static String buildExplainMeaningMessage(final String suggestedCategory) {
+    return "This is some information about the" +  suggestedCategory;
   }
 }

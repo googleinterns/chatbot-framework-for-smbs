@@ -9,6 +9,7 @@ message TriggerEventNotification {
     SUGGEST_CATEGORY_CHANGE = 1;
     SUGGEST_IMAGE_UPLOAD = 2;
     PROVIDE_SUMMARY = 3;
+    GET_CALL_FEEDBACK = 4;
   }
   enum ChatClient {
     UNKNOWN_CHAT_CLIENT = 0;

@@ -2,8 +2,10 @@ package com.chatbot.services;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -12,6 +14,12 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.googleapis.auth.oauth2.GooglePublicKeysManager;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.services.chat.v1.model.ActionResponse;
+import com.google.api.services.chat.v1.model.Card;
+import com.google.api.services.chat.v1.model.Message;
+import com.google.api.services.chat.v1.model.Section;
+import com.google.api.services.chat.v1.model.TextParagraph;
+import com.google.api.services.chat.v1.model.WidgetMarkup;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,13 +42,14 @@ public class ChatServiceController {
   private static final String REMOVED_FROM_SPACE_EVENT = "REMOVED_FROM_SPACE";
   private static final String ADDED_TO_SPACE_EVENT = "ADDED_TO_SPACE";
   private static final String MESSAGE_EVENT = "MESSAGE";
+  private static final String CARD_CLICKED_EVENT = "CARD_CLICKED";
   private static final String CHAT_ISSUER = "chat@system.gserviceaccount.com";
   private static final String PUBLIC_CERT_URL_PREFIX =
       "https://www.googleapis.com/service_accounts/v1/metadata/x509/";
   private static final String AUDIENCE = System.getenv("projectNumber");
 
   @PostMapping("/")
-  public String onRequest(@RequestHeader final Map<String, String> headers,
+  public Message onRequest(@RequestHeader final Map<String, String> headers,
       @RequestBody final JsonNode event) throws IOException, GeneralSecurityException {
     if (headers.get("user-agent").equals(HANGOUTS_USER_AGENT)) {
       final String BEARER_TOKEN = headers.get("authorization").split(" ")[1];
@@ -74,7 +83,24 @@ public class ChatServiceController {
       // whatsapp async handler
       // return acknowledgement
     }
-    return "";
+    Message reply = new Message();
+    if(!event.at("/type").asText().equals(CARD_CLICKED_EVENT)) {
+      // an empty message acts as an acknowledgement for a text message
+      reply.setText("");
+    }
+    else {
+      // replace the button with a text paragraph to render it unclickable
+      reply.setActionResponse((new ActionResponse()).set("type", "UPDATE_MESSAGE"));
+      List<WidgetMarkup> widgets = new ArrayList<>();
+      TextParagraph widget =
+          new TextParagraph().setText(event.at("/action/parameters/0/value").asText());
+      widgets.add(new WidgetMarkup().setTextParagraph(widget));
+      Section section = new Section()
+          .setWidgets(widgets);
+      reply.setCards(Collections
+          .singletonList((new Card()).setSections(Collections.singletonList(section))));
+    }
+    return reply;
   }
 
   private ChatServiceRequest parseHangoutsRequest(final JsonNode event) throws Exception {
@@ -94,6 +120,11 @@ public class ChatServiceController {
       case REMOVED_FROM_SPACE_EVENT:
         chatServiceRequestBuilder.setRequestType(RequestType.REMOVED);
         break;
+      case CARD_CLICKED_EVENT:
+        chatServiceRequestBuilder.setRequestType(RequestType.MESSAGE);
+        chatServiceRequestBuilder = parseHangoutsCardClick(chatServiceRequestBuilder, event);
+        break;
+        // throw new IllegalArgumentException("Nothing much");
       default:
         throw new IllegalArgumentException("The request has no event type");
     }
@@ -130,6 +161,15 @@ public class ChatServiceController {
     } else {
       userMessageBuilder.setText(event.at("/message/text").asText());
     }
+    chatServiceRequestBuilder.setUserMessage(userMessageBuilder);
+    return chatServiceRequestBuilder;
+  }
+
+  private ChatServiceRequest.Builder parseHangoutsCardClick(
+      final ChatServiceRequest.Builder chatServiceRequestBuilder, final JsonNode event) {
+    final ChatServiceRequest.UserMessage.Builder userMessageBuilder =
+        ChatServiceRequest.UserMessage.newBuilder();
+    userMessageBuilder.setText(event.at("/action/parameters/0/value").asText());
     chatServiceRequestBuilder.setUserMessage(userMessageBuilder);
     return chatServiceRequestBuilder;
   }

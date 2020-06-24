@@ -1,7 +1,6 @@
 package com.chatbot.services;
 
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Map;
@@ -29,6 +28,7 @@ public class PubSubController {
   private static final String TRIGGER_EVENT_MESSAGE = "TriggerEvent";
   private static final String SUGGEST_CATEGORY_CHANGE_EVENT = "SUGGEST_CATEGORY_CHANGE";
   private static final String SUGGEST_IMAGE_UPLOAD_EVENT = "SUGGEST_IMAGE_UPLOAD";
+  private static final String GET_CALL_FEEDBACK_EVENT = "GET_CALL_FEEDBACK";
   private static final GoogleIdTokenVerifier verifier =
       new GoogleIdTokenVerifier.Builder(new NetHttpTransport(),
       new JacksonFactory()).setAudience(Collections.singletonList(System.getenv("pubsubAudience")))
@@ -36,7 +36,7 @@ public class PubSubController {
 
   @PostMapping("/pubsub")
   public String onRequest(@RequestHeader final Map<String, String> headers,
-      @RequestBody final JsonNode message) throws GeneralSecurityException, IOException {
+      @RequestBody final JsonNode message) throws Exception {
     final String authorizationHeader = headers.get("authorization");
     if (authorizationHeader == null || authorizationHeader.isEmpty()
         || authorizationHeader.split(" ").length != 2) {
@@ -91,13 +91,22 @@ public class PubSubController {
         case SUGGEST_CATEGORY_CHANGE_EVENT:
           final com.google.protobuf.Value suggestedCategory = com.google.protobuf.Value.newBuilder()
           .setStringValue(message.at("/message/attributes/suggestedCategory").asText()).build();
-          final Struct eventParams = Struct.newBuilder()
+          final Struct paramsForCategoryChangeEvent = Struct.newBuilder()
               .putFields("suggestedCategory", suggestedCategory).build();
           triggerEventNotificationBuilder
-              .setEvent(Event.SUGGEST_CATEGORY_CHANGE).setEventParams(eventParams);
+              .setEvent(Event.SUGGEST_CATEGORY_CHANGE).setEventParams(paramsForCategoryChangeEvent);
           break;
         case SUGGEST_IMAGE_UPLOAD_EVENT:
           triggerEventNotificationBuilder.setEvent(Event.SUGGEST_IMAGE_UPLOAD);
+          break;
+        case GET_CALL_FEEDBACK_EVENT:
+          triggerEventNotificationBuilder.setEvent(Event.GET_CALL_FEEDBACK);
+          final com.google.protobuf.Value mobileNumber = com.google.protobuf.Value.newBuilder()
+              .setStringValue(message.at("/message/attributes/mobileNumber").asText()).build();
+          final Struct paramsForGetFeedbackEvent = Struct.newBuilder()
+              .putFields("mobileNumber", mobileNumber).build();
+          triggerEventNotificationBuilder
+              .setEvent(Event.GET_CALL_FEEDBACK).setEventParams(paramsForGetFeedbackEvent);
           break;
         default:
           throw new IllegalArgumentException("Unknown event provided in published message");

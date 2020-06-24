@@ -26,8 +26,9 @@ public class DialogflowConversation {
   private final String langCode;
   private final String sessionID;
   private static Map<String, List<String>> EVENT_TO_CONTEXT_MAPPING = Map.of(
-      "SUGGEST_CATEGORY_CHANGE", Arrays.asList("SuggestChangeCatgeory"),
-      "SUGGEST_IMAGE_UPLOAD", Arrays.asList("SuggestImageUploadContext")); 
+      "SUGGEST_CATEGORY_CHANGE", Arrays.asList("SuggestChangeCatgeoryContext"),
+      "SUGGEST_IMAGE_UPLOAD", Arrays.asList("SuggestImageUploadContext"),
+      "GET_CALL_FEEDBACK", Arrays.asList("GetCallFeedbackContext")); 
 
   public DialogflowConversation(final String projectIDToSet, final String langCodeToSet,
       final String sessionIDToSet) {
@@ -43,7 +44,7 @@ public class DialogflowConversation {
   }
 
   // function to get the response for a user message from dialogflow
-  public String sendMessage(final String message, final Struct payload) throws IOException {
+  public QueryResult sendMessage(final String message, final Struct payload) throws Exception {
     try (SessionsClient sessionsClient = SessionsClient.create()) {
       final SessionName session = SessionName.of(projectID, sessionID);
       final TextInput.Builder textInput = TextInput.newBuilder().setText(message)
@@ -55,14 +56,15 @@ public class DialogflowConversation {
           DetectIntentRequest.newBuilder().setSession(session.toString()).setQueryInput(queryInput)
           .setQueryParams(queryParameters).build();
       final DetectIntentResponse response = sessionsClient.detectIntent(detectIntentRequest);
-      final QueryResult queryResult = response.getQueryResult();
-      return queryResult.getFulfillmentText();
+      // final QueryResult queryResult = response.getQueryResult();
+      return response.getQueryResult();
+      // return queryResult.getFulfillmentText();
     }
   }
 
   // function to get the response for an event from dialogflow
   public String triggerEvent(final String event, final Struct parameters, final Struct payload)
-      throws IOException {
+      throws Exception {
     try (SessionsClient sessionsClient = SessionsClient.create()) {
       final SessionName session = SessionName.of(projectID, sessionID);
       final EventInput.Builder eventInput = EventInput.newBuilder().setName(event)
@@ -84,6 +86,7 @@ public class DialogflowConversation {
     }
   }
 
+
   public void setContextForSession(final String ContextName) throws IOException {
     try (ContextsClient contextsClient = ContextsClient.create()) {
       final SessionName parent = SessionName.of(projectID, sessionID);
@@ -91,8 +94,10 @@ public class DialogflowConversation {
           .newBuilder()
           .setName("projects/" + projectID + "/agent/sessions/" + sessionID + "/contexts/"
           + ContextName)
+          .setLifespanCount(1)
           .build();
-      CreateContextRequest.newBuilder().setParent(parent.toString()).setContext(context).build();
+      contextsClient.createContext(CreateContextRequest.newBuilder().setParent(parent.toString())
+          .setContext(context).build());
     }
   }
 

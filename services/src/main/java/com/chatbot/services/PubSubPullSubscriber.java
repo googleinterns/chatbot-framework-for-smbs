@@ -1,6 +1,5 @@
 package com.chatbot.services;
 
-import java.io.IOException;
 import java.util.Map;
 
 import com.chatbot.services.protobuf.TriggerEventNotificationOuterClass.TriggerEventNotification;
@@ -56,7 +55,7 @@ public class PubSubPullSubscriber {
             buildNotificationFromMessage(messageAttributesMap);
         try {
           asyncService.triggerEventHandler(triggerEventNotification);
-        } catch (final IOException e) {
+        } catch (final Exception e) {
           e.printStackTrace();
         }
       } else {
