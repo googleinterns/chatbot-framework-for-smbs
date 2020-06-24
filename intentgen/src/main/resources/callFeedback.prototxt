@@ -1,0 +1,43 @@
+intents {
+  intent_name: "GetCallFeedback"
+  successors: "CallWasRelevant"
+  successors: "ProbeIrrelevantCall"
+  trainingPhrases: "I just got a call from |@sys.any;mobileNumber;132546798|"
+  responses: "Hey! You just received a call for from $mobileNumber, was this call relevant to your business?"
+  events: "GET_CALL_FEEDBACK"
+}
+intents {
+  intent_name: "CallWasRelevant"
+  intent_type: YES
+  responses: "Thank you for your time"
+  variables: "mobileNumber"
+  fulfillment_enabled: true
+}
+intents {
+  intent_name: "ProbeIrrelevantCall"
+  intent_type: NO
+  successors: "CallUnrelatedToBusinessCategory"
+  successors: "CallFromOutsideServiceArea"
+  successors: "ExitWithThanks"
+  responses: "What was wrong with the call?"
+  variables: "mobileNumber"
+}
+intents {
+  intent_name: "CallFromOutsideServiceArea"
+  trainingPhrases: "It was not from my city"
+  trainingPhrases: "The caller was located very far"
+  trainingPhrases: "It was from outside my service area"
+  trainingPhrases: "The call was from another state"
+  variables: "mobileNumber"
+  responses: "Thank you for your time" 
+  fulfillment_enabled: true
+}
+intents {
+  intent_name: "CallUnrelatedToBusinessCategory"
+  trainingPhrases: "The caller wanted a product we do not provide"
+  trainingPhrases: "It was unrealted to my business"
+  trainingPhrases: "It was for services different from what we provide"
+  responses: "Thank you for your time"
+  variables: "mobileNumber"
+  fulfillment_enabled: true
+}

@@ -13,7 +13,9 @@ import java.util.stream.Collectors;
 import com.chatbot.protobuf.UseCaseOuterClass.UseCase;
 import com.google.cloud.dialogflow.v2.Context;
 import com.google.cloud.dialogflow.v2.Intent;
+import com.google.cloud.dialogflow.v2.Intent.Parameter;
 import com.google.cloud.dialogflow.v2.Intent.TrainingPhrase;
+import com.google.cloud.dialogflow.v2.Intent.WebhookState;
 import com.google.cloud.dialogflow.v2.Intent.TrainingPhrase.Part;
 import com.google.cloud.dialogflow.v2.IntentsClient;
 import com.google.cloud.dialogflow.v2.ProjectAgentName;
@@ -135,6 +137,16 @@ public class IntentGenerator {
     return intentProtobufBuilder.addMessages(message);
   }
 
+  private static Intent.Builder addVariables(UseCase.Intent intent,
+      Intent.Builder intentProtobufBuilder) {
+      List<String> variables = intent.getVariablesList();
+      List<Parameter> parameters = variables.stream().map(variable -> 
+          Parameter.newBuilder().setDisplayName(variable).setValue("$" + variable)
+          .setDefaultValue("#" + intent.getIntentName() + "Context." + variable).build())
+          .collect(Collectors.toList());
+      return intentProtobufBuilder.addAllParameters(parameters);
+  }
+
   private static Intent.Builder addOutputContexts(UseCase.Intent intent,
       Intent.Builder intentProtobufBuilder, String projectID) {
     List<Context> outputContextProtobufList= new ArrayList<Context>();
@@ -167,11 +179,13 @@ public class IntentGenerator {
     addOutputContexts(intent, intentProtobufBuilder, projectID);
     intentProtobufBuilder.addInputContextNames("projects/" + projectID +
         "/agent/sessions/-/contexts/" + intent.getIntentName() + "Context");
-
     intentProtobufBuilder = addTrainingPhrases(intent, intentProtobufBuilder);
     intentProtobufBuilder = addResponses(intent, intentProtobufBuilder);        
+    intentProtobufBuilder = addVariables(intent, intentProtobufBuilder);
     intentProtobufBuilder.addAllEvents(intent.getEventsList());
-
+    if(intent.getFulfillmentEnabled()) {
+      intentProtobufBuilder.setWebhookStateValue(WebhookState.WEBHOOK_STATE_ENABLED_VALUE);
+    }
     if(intentDisplayNameToName.containsKey(intent.getIntentName())) {
       intentProtobufBuilder.setName(intentDisplayNameToName.get(intent.getIntentName()));
     }

@@ -18,6 +18,7 @@ message UseCase {
     repeated string trainingPhrases = 5;
     repeated string responses = 6;
     repeated string events = 7;
+    bool fulfillment_enabled = 8;
   }
 
   repeated Intent intents = 1;
