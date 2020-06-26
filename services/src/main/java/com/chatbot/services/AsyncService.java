@@ -23,15 +23,17 @@ public class AsyncService {
   private HangoutsMessageSender hangoutsMessageSender;
   @Autowired
   private IDMapping iDMapping;
+
+
   private static final String IMAGES_RECEIVED_MESSAGE = "The images have been received!";
   private static final String THANKS_FOR_ADDING_MESSAGE = "Thank You for Adding me";
   private static final String NOT_EXPECTING_IMAGE_MESSAGE =
       "Sorry, we were not expecting any attachements from you.";
   private static final String EXPECTING_IMAGES_CONTEXT = "expectingimagescontext";
   private static final List<String> LIST_OF_INTENTS_WITH_INTERACTIVE_RESPONSE = new ArrayList<>(
-    Arrays.asList("Default Welcome Intent", "Default Fallback Intent")
+    Arrays.asList("Default Welcome Intent", "Default Fallback Intent", "NotGettingEnoughCalls")
   );
-
+  
   @Async("asyncExecutor")
   public void hangoutsAsyncHandler(final ChatServiceRequest chatServiceRequest) throws Exception {
     final String spaceID = chatServiceRequest.getSender().getChatClientGeneratedId();
@@ -48,12 +50,13 @@ public class AsyncService {
         final DialogflowConversation dialogflowConversation =
             new DialogflowConversation(System.getenv("projectID"), spaceID);
         if (chatServiceRequest.getUserMessage().getAttachmentsCount() == 0) {
-          final Value userID = Value.newBuilder().setStringValue(chatServiceRequest.getSender()
-              .getUserId()).build();
-          final Struct payload = Struct.newBuilder().putFields("userID", userID).build();
-          final QueryResult queryResult = dialogflowConversation
-              .sendMessage(chatServiceRequest.getUserMessage().getText(),
-               payload);
+          final Value userID = Value.newBuilder()
+              .setStringValue(chatServiceRequest.getSender().getUserId()).build();
+          final Struct payload = Struct.newBuilder()
+              .putFields("userID", userID)
+              .build();
+          final QueryResult queryResult = dialogflowConversation.sendMessage(
+              chatServiceRequest.getUserMessage().getText(), payload);
           final String response = queryResult.getFulfillmentText();
           if(LIST_OF_INTENTS_WITH_INTERACTIVE_RESPONSE
               .contains(queryResult.getIntent().getDisplayName())) {
@@ -81,15 +84,18 @@ public class AsyncService {
 
   @Async("asyncExecutor")
   public void sendMessageUsingUserID(final String userID, final String message,
-      final ChatClient chatClient) throws IOException {
+      final ChatClient chatClient, final boolean isCard) throws IOException {
     switch (chatClient) {
       case HANGOUTS:
-        hangoutsMessageSender
-            .sendMessage(iDMapping.getChatClientGeneratedID(userID,ChatClient.HANGOUTS), message);
+        if(isCard) {
+          hangoutsMessageSender.sendCardMessage(
+              iDMapping.getChatClientGeneratedID(userID,ChatClient.HANGOUTS), message);
+        } else {
+          hangoutsMessageSender.sendMessage(
+              iDMapping.getChatClientGeneratedID(userID,ChatClient.HANGOUTS), message);
+        }
         break;
       case WHATSAPP:
-        hangoutsMessageSender
-            .sendMessage(iDMapping.getChatClientGeneratedID(userID, ChatClient.WHATSAPP), message);
         break;
       default:
         throw new IllegalArgumentException("Unknown chat client found");
@@ -119,8 +125,12 @@ public class AsyncService {
     final String chatClientGeneratedID = iDMapping.getChatClientGeneratedID(userID, chatClient);
     final DialogflowConversation dialogflowConversation =
         new DialogflowConversation(System.getenv("projectID"), chatClientGeneratedID);
-    final Value userIDValue = Value.newBuilder().setStringValue(userID).build();
-    final Struct payload = Struct.newBuilder().putFields("userID", userIDValue).build();
+    final Value userIDValue = Value.newBuilder()
+        .setStringValue(userID)
+        .build();
+    final Struct payload = Struct.newBuilder()
+        .putFields("userID", userIDValue)
+        .build();
     final String triggerResponse = dialogflowConversation
         .triggerEvent(triggerEventNotification.getEvent().name(),
         triggerEventNotification.getEventParams(), payload);

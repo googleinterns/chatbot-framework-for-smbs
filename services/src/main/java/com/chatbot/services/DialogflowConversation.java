@@ -67,14 +67,19 @@ public class DialogflowConversation {
       throws Exception {
     try (SessionsClient sessionsClient = SessionsClient.create()) {
       final SessionName session = SessionName.of(projectID, sessionID);
-      final EventInput.Builder eventInput = EventInput.newBuilder().setName(event)
-          .setParameters(parameters).setLanguageCode(langCode);
+      final EventInput.Builder eventInput = EventInput.newBuilder()
+          .setName(event)
+          .setParameters(parameters)
+          .setLanguageCode(langCode);
       final QueryInput queryInput = QueryInput.newBuilder().setEvent(eventInput).build();
-      final QueryParameters queryParameters = QueryParameters.newBuilder().setPayload(payload)
+      final QueryParameters queryParameters = QueryParameters.newBuilder()
+          .setPayload(payload)
           .build();
-      final DetectIntentRequest detectIntentRequest = 
-          DetectIntentRequest.newBuilder().setSession(session.toString()).setQueryInput(queryInput)
-          .setQueryParams(queryParameters).build();
+      final DetectIntentRequest detectIntentRequest = DetectIntentRequest.newBuilder()
+          .setSession(session.toString())
+          .setQueryInput(queryInput)
+          .setQueryParams(queryParameters)
+          .build();
       // before triggering an event, we would need to set the context to the input context of the
       // intent that we want to be matched
       for(final String contextName : EVENT_TO_CONTEXT_MAPPING.get(event)) {
@@ -96,7 +101,8 @@ public class DialogflowConversation {
           + ContextName)
           .setLifespanCount(1)
           .build();
-      contextsClient.createContext(CreateContextRequest.newBuilder().setParent(parent.toString())
+      contextsClient.createContext(CreateContextRequest.newBuilder()
+          .setParent(parent.toString())
           .setContext(context).build());
     }
   }

@@ -59,29 +59,25 @@ public class HangoutsMessageSender {
   }
 
   public void sendCardMessage(final String spaceID, final String msg) throws IOException {
-    List<String> messageParts = new ArrayList<>(Arrays.asList(msg.split("\n")));
-    CardHeader cardHeader = new CardHeader();
+    final List<String> messageParts = new ArrayList<>(Arrays.asList(msg.split("\n")));
+    final CardHeader cardHeader = new CardHeader();
     cardHeader.setTitle(messageParts.get(0));
-    List<Section> sectionList = new ArrayList<>();
-    for(String option: messageParts.subList(1, messageParts.size())) {
-      List<WidgetMarkup> widgets = new ArrayList<>();
-      List<ActionParameter> customParameters = Collections.singletonList(
-              new ActionParameter().setKey("message").setValue(option)
-      );
-      FormAction action = new FormAction()
+    final List<Section> sectionList = new ArrayList<>();
+    for (final String option : messageParts.subList(1, messageParts.size())) {
+      final List<WidgetMarkup> widgets = new ArrayList<>();
+      final List<ActionParameter> customParameters = Collections
+          .singletonList(new ActionParameter().setKey("message").setValue(option));
+      final FormAction action = new FormAction()
           .setActionMethodName("INTERACTIVE_TEXT_BUTTON_ACTION")
           .setParameters(customParameters);
-      OnClick onClick = new OnClick().setAction(action);
-      TextButton button = new TextButton()
-          .setText(option)
-          .setOnClick(onClick);
-      Button widget = new Button().setTextButton(button);
+      final OnClick onClick = new OnClick().setAction(action);
+      final TextButton button = new TextButton().setText(option).setOnClick(onClick);
+      final Button widget = new Button().setTextButton(button);
       widgets.add(new WidgetMarkup().setButtons(Collections.singletonList((widget))));
-      Section section = new Section()
-          .setWidgets(widgets);
+      final Section section = new Section().setWidgets(widgets);
       sectionList.add(section);
     }
-    Card card =
+    final Card card =
         (new Card()).setHeader(cardHeader).setSections(Collections.unmodifiableList(sectionList));
     final Message message = new Message().setCards(Collections.singletonList(card));    
     chatService.spaces().messages().create("spaces/" + spaceID, message).execute();

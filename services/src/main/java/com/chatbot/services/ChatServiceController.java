@@ -83,19 +83,18 @@ public class ChatServiceController {
       // whatsapp async handler
       // return acknowledgement
     }
-    Message reply = new Message();
-    if(!event.at("/type").asText().equals(CARD_CLICKED_EVENT)) {
+    final Message reply = new Message();
+    if (!event.at("/type").asText().equals(CARD_CLICKED_EVENT)) {
       // an empty message acts as an acknowledgement for a text message
       reply.setText("");
-    }
-    else {
+    } else {
       // replace the button with a text paragraph to render it unclickable
       reply.setActionResponse((new ActionResponse()).set("type", "UPDATE_MESSAGE"));
-      List<WidgetMarkup> widgets = new ArrayList<>();
-      TextParagraph widget =
+      final List<WidgetMarkup> widgets = new ArrayList<>();
+      final TextParagraph widget =
           new TextParagraph().setText(event.at("/action/parameters/0/value").asText());
       widgets.add(new WidgetMarkup().setTextParagraph(widget));
-      Section section = new Section()
+      final Section section = new Section()
           .setWidgets(widgets);
       reply.setCards(Collections
           .singletonList((new Card()).setSections(Collections.singletonList(section))));
@@ -176,8 +175,8 @@ public class ChatServiceController {
 
   private ChatServiceRequest.Builder parseHangoutsSender(
         final ChatServiceRequest.Builder chatServiceRequestBuilder, final JsonNode event) {
-    final ChatServiceRequest.Sender.Builder senderBuilder = ChatServiceRequest.Sender.newBuilder();
-    senderBuilder.setDisplayName(event.at("/user/displayName").asText())
+    final ChatServiceRequest.Sender.Builder senderBuilder = ChatServiceRequest.Sender.newBuilder()
+        .setDisplayName(event.at("/user/displayName").asText())
         .setChatClientGeneratedId(event.at("/space/name").asText().substring(7))
         .setUserId(event.at("/user/name").asText().substring(6));
     chatServiceRequestBuilder.setSender(senderBuilder); 
