@@ -10,6 +10,7 @@ intents {
 intents {
   intent_name: "UploadImage"
   intent_type: YES
+  successors: "ExpectingImages"
   responses: "You can upload the images right here in the chat"
 }
 intents {

@@ -1,0 +1,22 @@
+intents {
+  intent_name: "GettingCallsFromOutsideServiceArea"
+  successors: "SuggestTargetAreaChange"
+  successors: "ExitWithThanks"
+  trainingPhrases: "We are receiving calls from other cities"
+  trainingPhrases: "I am getting calls from other states"
+  trainingPhrases: "I am receiving calls from far away places"
+  trainingPhrases: "We are getting calls from outside our service area"
+  responses: "Would you like to change your target area?"
+}
+intents {
+  intent_name: "SuggestTargetAreaChange"
+  successors: "ChangeTargetArea"
+  intent_type: YES
+  fulfillment_enabled: true
+}
+intents {
+  intent_name: "ChangeTargetArea"
+  trainingPhrases: "Change it to |@sys.unit-length;radius;5Km|"
+  successors: "NoOp"
+  fulfillment_enabled: true
+}
