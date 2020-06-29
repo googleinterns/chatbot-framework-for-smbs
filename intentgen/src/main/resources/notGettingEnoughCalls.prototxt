@@ -1,0 +1,9 @@
+intents {
+  intent_name: "NotGettingEnoughCalls"
+  successors: "UploadImage"
+  successors: "SuggestCategoryChange"
+  trainingPhrases: "I am not getting enough calls"
+  trainingPhrases: "We are not receiving any calls"
+  trainingPhrases: "I get very few calls"
+  responses: "Please choose one:\nI would like to change my category\nI would like to add images"
+}

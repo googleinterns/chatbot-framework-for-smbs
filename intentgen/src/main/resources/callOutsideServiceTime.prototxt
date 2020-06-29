@@ -1,0 +1,21 @@
+intents {
+  intent_name: "GettingCallsOutsideServiceTime"
+  successors: "SuggestServiceTimeChange"
+  successors: "ExitWithThanks"
+  trainingPhrases: "We are receiving calls outside working hours"
+  trainingPhrases: "I am getting calls outside my service time"
+  trainingPhrases: "I am receiving calls when we are not open"
+  responses: "Would you like to change your service timings?"
+}
+intents {
+  intent_name: "SuggestServiceTimeChange"
+  successors: "ChangeServiceTime"
+  intent_type: YES
+  fulfillment_enabled: true
+}
+intents {
+  intent_name: "ChangeServiceTime"
+  trainingPhrases: "change to |@sys.time;startTime;08:00| to |@sys.time;endTime;20:00|"
+  trainingPhrases: "change the timings to |@sys.time;startTime;10:00| to |@sys.time;endTime;17:00|"
+  fulfillment_enabled: true
+}

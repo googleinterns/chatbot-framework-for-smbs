@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option java_package = "com.chatbot.protobuf";
+
+message UseCase {
+
+  enum IntentType {
+    UNKNOWN_INTENT_TYPE = 0;
+    YES = 1;
+    NO = 2;
+  }
+
+  message Intent {
+    string intent_name = 1;
+    IntentType intent_type = 2;
+    repeated string successors = 3;
+    repeated string variables = 4;
+    repeated string trainingPhrases = 5;
+    repeated string responses = 6;
+    repeated string events = 7;
+    bool fulfillment_enabled = 8;
+  }
+
+  repeated Intent intents = 1;
+}
