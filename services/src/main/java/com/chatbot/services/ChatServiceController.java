@@ -71,7 +71,7 @@ public class ChatServiceController {
         throw new IllegalArgumentException("Invalid token");
       }
       try {
-        asyncService.hangoutsAsyncHandler(BuildChatServiceRequestFromHangoutsRequest(event));
+        asyncService.hangoutsAsyncHandler(buildChatServiceRequestFromHangoutsRequest(event));
       } catch (final Exception e) {
         // If there was an error in parsing the request, either we do not support the
         // type of request or the format of the request is incorrect, in both these cases
@@ -102,7 +102,7 @@ public class ChatServiceController {
     return reply;
   }
 
-  private ChatServiceRequest BuildChatServiceRequestFromHangoutsRequest(final JsonNode event)
+  static ChatServiceRequest buildChatServiceRequestFromHangoutsRequest(final JsonNode event)
       throws Exception {
     if ("ROOM".equals(event.at("/space/type").asText())) {
       throw new IllegalArgumentException("The message was received from a room");
@@ -131,10 +131,9 @@ public class ChatServiceController {
     return chatServiceRequestBuilder.build();
   }
 
-  private ChatServiceRequest.Builder parseHangoutsUserMessage(
+  static ChatServiceRequest.Builder parseHangoutsUserMessage(
       final ChatServiceRequest.Builder chatServiceRequestBuilder, final JsonNode event) {
-    final ChatServiceRequest.UserMessage.Builder userMessageBuilder =
-        ChatServiceRequest.UserMessage.newBuilder();
+    final ChatServiceRequest.UserMessage.Builder userMessageBuilder = ChatServiceRequest.UserMessage.newBuilder();
     if (event.at("/message").has("attachment")) {
       if (event.at("/message").has("argumentText")) {
         userMessageBuilder.setText(event.at("/message/argumentText").asText());
@@ -142,8 +141,7 @@ public class ChatServiceController {
       final Iterator<JsonNode> attachmentIterator = event.at("/message/attachment").elements();
       while (attachmentIterator.hasNext()) {
         final JsonNode attachment = (JsonNode) attachmentIterator.next();
-        final ChatServiceRequest.Attachment.Builder attachmentBuilder =
-            ChatServiceRequest.Attachment.newBuilder();
+        final ChatServiceRequest.Attachment.Builder attachmentBuilder = ChatServiceRequest.Attachment.newBuilder();
         attachmentBuilder.setLink(attachment.at("/downloadUri").asText());
         switch (attachment.at("/contentType").asText()) {
           case "image/png":
@@ -164,22 +162,36 @@ public class ChatServiceController {
     return chatServiceRequestBuilder;
   }
 
-  private ChatServiceRequest.Builder parseHangoutsCardClick(
-      final ChatServiceRequest.Builder chatServiceRequestBuilder, final JsonNode event) {
-    final ChatServiceRequest.UserMessage.Builder userMessageBuilder =
-        ChatServiceRequest.UserMessage.newBuilder();
+  static ChatServiceRequest.Builder parseHangoutsCardClick(
+      final ChatServiceRequest.Builder chatServiceRequestBuilder, final JsonNode event)
+      throws IllegalArgumentException {
+    final ChatServiceRequest.UserMessage.Builder userMessageBuilder = ChatServiceRequest.UserMessage.newBuilder();
+    if(!event.at("/action").has("parameters")) {
+      throw new IllegalArgumentException("No card click parameters available");
+    }
     userMessageBuilder.setText(event.at("/action/parameters/0/value").asText());
     chatServiceRequestBuilder.setUserMessage(userMessageBuilder);
     return chatServiceRequestBuilder;
   }
 
-  private ChatServiceRequest.Builder parseHangoutsSender(
-        final ChatServiceRequest.Builder chatServiceRequestBuilder, final JsonNode event) {
+  static ChatServiceRequest.Builder parseHangoutsSender(
+        final ChatServiceRequest.Builder chatServiceRequestBuilder, final JsonNode event)
+        throws IllegalArgumentException, IndexOutOfBoundsException {
+    if(!event.at("/user").has("displayName")) {
+      throw new IllegalArgumentException("No display name available in request");
+    }
+    if(!event.at("/space").has("name")) {
+      throw new IllegalArgumentException("No spaceID available in request");
+    }
+    if(!event.at("/user").has("name")) {
+      throw new IllegalArgumentException("No userID available in request");
+    }
     final ChatServiceRequest.Sender.Builder senderBuilder = ChatServiceRequest.Sender.newBuilder()
         .setDisplayName(event.at("/user/displayName").asText())
         .setChatClientGeneratedId(event.at("/space/name").asText()
         .substring(IDMapping.SPACEID_PREFIX_LENGTH))
-        .setUserId(event.at("/user/name").asText().substring(IDMapping.USERID_PREFIX_LENGTH));
+        .setUserId(event.at("/user/name").asText()
+        .substring(IDMapping.USERID_PREFIX_LENGTH));
     chatServiceRequestBuilder.setSender(senderBuilder); 
     return chatServiceRequestBuilder;
   }

@@ -12,6 +12,10 @@ import com.google.cloud.dialogflow.v2.SessionName;
 import com.google.cloud.dialogflow.v2.SessionsClient;
 import com.google.cloud.dialogflow.v2.TextInput;
 import com.google.protobuf.Struct;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.cloud.dialogflow.v2.EventInput;
 
 import java.io.IOException;
@@ -20,6 +24,7 @@ import java.util.List;
 
 public class DialogflowConversation {
 
+  private static final Logger logger = LoggerFactory.getLogger(DialogflowConversation.class);
   private static String projectID;
   private final String langCode;
   private final String sessionID;
@@ -72,9 +77,14 @@ public class DialogflowConversation {
           .build();
       // before triggering an event, we would need to set the context to the input context of the
       // intent that we want to be matched
-      for(final String contextName : ChatServiceConstants.EVENT_TO_CONTEXT_MAPPING.get(event)) {
-        setContextForSession(contextName);
-      }
+      ChatServiceConstants.EVENT_TO_CONTEXT_MAPPING.get(event)
+          .forEach(contextName -> {
+            try {
+              setContextForSession(contextName);
+            } catch (IOException e) {
+              logger.error("Error while setting contexts for session", e);
+            }
+          });
       final DetectIntentResponse response = sessionsClient.detectIntent(detectIntentRequest);
       return response.getQueryResult();
     }

@@ -52,11 +52,10 @@ public class IDMapping {
       final String spaceName = space.getName();
       final List<Membership> memebershipList = 
           chatService.spaces().members().list(spaceName).execute().getMemberships();
-      for (final Membership membership : memebershipList) {
-        ChatClientToChatClientBiMapMapping.get(ChatClient.HANGOUTS)
-            .put(spaceName.substring(SPACEID_PREFIX_LENGTH),
-            membership.getMember().getName().substring(USERID_PREFIX_LENGTH));
-      }
+      memebershipList.forEach(membership -> ChatClientToChatClientBiMapMapping
+          .get(ChatClient.HANGOUTS)
+          .put(spaceName.substring(SPACEID_PREFIX_LENGTH),
+          membership.getMember().getName().substring(USERID_PREFIX_LENGTH)));
     }
   }
 
