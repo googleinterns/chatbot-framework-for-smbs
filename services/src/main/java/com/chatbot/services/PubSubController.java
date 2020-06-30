@@ -14,6 +14,8 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.protobuf.Struct;
 
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,10 +27,7 @@ public class PubSubController {
 
   @Autowired
   private AsyncService asyncService;
-  private static final String TRIGGER_EVENT_MESSAGE = "TriggerEvent";
-  private static final String SUGGEST_CATEGORY_CHANGE_EVENT = "SUGGEST_CATEGORY_CHANGE";
-  private static final String SUGGEST_IMAGE_UPLOAD_EVENT = "SUGGEST_IMAGE_UPLOAD";
-  private static final String GET_CALL_FEEDBACK_EVENT = "GET_CALL_FEEDBACK";
+  private static final Logger logger = LoggerFactory.getLogger(PubSubController.class);
   private static final GoogleIdTokenVerifier verifier =
       new GoogleIdTokenVerifier.Builder(new NetHttpTransport(),
       new JacksonFactory()).setAudience(Collections.singletonList(System.getenv("pubsubAudience")))
@@ -38,6 +37,7 @@ public class PubSubController {
   public String onRequest(@RequestHeader final Map<String, String> headers,
       @RequestBody final JsonNode message) throws Exception {
     final String authorizationHeader = headers.get("authorization");
+    // authorization header format: `authorization <token>`
     if (authorizationHeader == null || authorizationHeader.isEmpty()
         || authorizationHeader.split(" ").length != 2) {
       throw new IllegalArgumentException("Bad Request");
@@ -47,13 +47,13 @@ public class PubSubController {
     }
     final String messageData =
         new String(Base64.getDecoder().decode(message.at("/message/data").asText()));
-    if (messageData.equals(TRIGGER_EVENT_MESSAGE)) {
+    if (messageData.equals(ChatServiceConstants.TRIGGER_EVENT_MESSAGE)) {
       final TriggerEventNotification triggerEventNotification =
           buildNotificationFromMessage(message);
       try {
         asyncService.triggerEventHandler(triggerEventNotification);
       } catch (final IOException e) {
-        e.printStackTrace();
+        logger.error("Error while handling event trigger", e);
       }
     } else {
       throw new IllegalArgumentException("Unknown type of message received by subscriber");
@@ -88,7 +88,7 @@ public class PubSubController {
     if(message.at("/message/attributes").has("event")) {
       final String eventName = message.at("/message/attributes/event").asText();
       switch (eventName) {
-        case SUGGEST_CATEGORY_CHANGE_EVENT:
+        case ChatServiceConstants.SUGGEST_CATEGORY_CHANGE_EVENT:
           final com.google.protobuf.Value suggestedCategory = com.google.protobuf.Value.newBuilder()
           .setStringValue(message.at("/message/attributes/suggestedCategory").asText()).build();
           final Struct paramsForCategoryChangeEvent = Struct.newBuilder()
@@ -96,10 +96,10 @@ public class PubSubController {
           triggerEventNotificationBuilder
               .setEvent(Event.SUGGEST_CATEGORY_CHANGE).setEventParams(paramsForCategoryChangeEvent);
           break;
-        case SUGGEST_IMAGE_UPLOAD_EVENT:
+        case ChatServiceConstants.SUGGEST_IMAGE_UPLOAD_EVENT:
           triggerEventNotificationBuilder.setEvent(Event.SUGGEST_IMAGE_UPLOAD);
           break;
-        case GET_CALL_FEEDBACK_EVENT:
+        case ChatServiceConstants.GET_CALL_FEEDBACK_EVENT:
           triggerEventNotificationBuilder.setEvent(Event.GET_CALL_FEEDBACK);
           final com.google.protobuf.Value mobileNumber = com.google.protobuf.Value.newBuilder()
               .setStringValue(message.at("/message/attributes/mobileNumber").asText()).build();

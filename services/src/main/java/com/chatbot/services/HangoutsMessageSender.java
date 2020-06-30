@@ -14,7 +14,6 @@ import com.google.api.services.chat.v1.HangoutsChat;
 import com.google.api.services.chat.v1.model.ActionParameter;
 import com.google.api.services.chat.v1.model.Button;
 import com.google.api.services.chat.v1.model.Card;
-import com.google.api.services.chat.v1.model.CardHeader;
 import com.google.api.services.chat.v1.model.FormAction;
 import com.google.api.services.chat.v1.model.Message;
 import com.google.api.services.chat.v1.model.OnClick;
@@ -60,8 +59,6 @@ public class HangoutsMessageSender {
 
   public void sendCardMessage(final String spaceID, final String msg) throws IOException {
     final List<String> messageParts = new ArrayList<>(Arrays.asList(msg.split("\n")));
-    final CardHeader cardHeader = new CardHeader();
-    cardHeader.setTitle(messageParts.get(0));
     final List<Section> sectionList = new ArrayList<>();
     for (final String option : messageParts.subList(1, messageParts.size())) {
       final List<WidgetMarkup> widgets = new ArrayList<>();
@@ -78,8 +75,9 @@ public class HangoutsMessageSender {
       sectionList.add(section);
     }
     final Card card =
-        (new Card()).setHeader(cardHeader).setSections(Collections.unmodifiableList(sectionList));
+        (new Card()).setSections(Collections.unmodifiableList(sectionList));
     final Message message = new Message().setCards(Collections.singletonList(card));    
+    sendMessage(spaceID, messageParts.get(0));
     chatService.spaces().messages().create("spaces/" + spaceID, message).execute();
   }
 }

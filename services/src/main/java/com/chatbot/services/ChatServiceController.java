@@ -26,6 +26,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.chatbot.services.protobuf.ChatServiceRequestOuterClass.ChatServiceRequest;
 import com.chatbot.services.protobuf.ChatServiceRequestOuterClass.ChatServiceRequest.ChatClient;
@@ -37,46 +39,44 @@ public class ChatServiceController {
 
   @Autowired
   private AsyncService asyncService;
-
-  private static final String HANGOUTS_USER_AGENT = "Google-Dynamite";
+  private static final Logger logger = LoggerFactory.getLogger(ChatServiceController.class);
   private static final String REMOVED_FROM_SPACE_EVENT = "REMOVED_FROM_SPACE";
   private static final String ADDED_TO_SPACE_EVENT = "ADDED_TO_SPACE";
   private static final String MESSAGE_EVENT = "MESSAGE";
   private static final String CARD_CLICKED_EVENT = "CARD_CLICKED";
-  private static final String CHAT_ISSUER = "chat@system.gserviceaccount.com";
-  private static final String PUBLIC_CERT_URL_PREFIX =
-      "https://www.googleapis.com/service_accounts/v1/metadata/x509/";
   private static final String AUDIENCE = System.getenv("projectNumber");
 
   @PostMapping("/")
   public Message onRequest(@RequestHeader final Map<String, String> headers,
       @RequestBody final JsonNode event) throws IOException, GeneralSecurityException {
-    if (headers.get("user-agent").equals(HANGOUTS_USER_AGENT)) {
+    if (headers.get("user-agent").equals(ChatServiceConstants.HANGOUTS_USER_AGENT)) {
+      // authorization header format: `authorization <token>`
       final String BEARER_TOKEN = headers.get("authorization").split(" ")[1];
       final JacksonFactory factory = new JacksonFactory();
       final GooglePublicKeysManager.Builder keyManagerBuilder = new GooglePublicKeysManager.Builder(
           new NetHttpTransport(), factory);
-      final String certUrl = PUBLIC_CERT_URL_PREFIX + CHAT_ISSUER;
+      final String certUrl = ChatServiceConstants.PUBLIC_CERT_URL_PREFIX
+          + ChatServiceConstants.CHAT_ISSUER;
       keyManagerBuilder.setPublicCertsEncodedUrl(certUrl);
       final GoogleIdTokenVerifier.Builder verifierBuilder = new GoogleIdTokenVerifier.Builder(
           keyManagerBuilder.build());
-      verifierBuilder.setIssuer(CHAT_ISSUER);
+      verifierBuilder.setIssuer(ChatServiceConstants.CHAT_ISSUER);
       final GoogleIdTokenVerifier verifier = verifierBuilder.build();
       final GoogleIdToken idToken = GoogleIdToken.parse(factory, BEARER_TOKEN);
       if (idToken == null) {
         throw new IllegalArgumentException("Token cannot be parsed");
       }
       if (!verifier.verify(idToken) || !idToken.verifyAudience(Collections.singletonList(AUDIENCE))
-          || !idToken.verifyIssuer(CHAT_ISSUER)) {
+          || !idToken.verifyIssuer(ChatServiceConstants.CHAT_ISSUER)) {
         throw new IllegalArgumentException("Invalid token");
       }
       try {
-        asyncService.hangoutsAsyncHandler(parseHangoutsRequest(event));
+        asyncService.hangoutsAsyncHandler(BuildChatServiceRequestFromHangoutsRequest(event));
       } catch (final Exception e) {
         // If there was an error in parsing the request, either we do not support the
         // type of request or the format of the request is incorrect, in both these cases
         // returning an empty string is an option.
-        e.printStackTrace();
+        logger.error("Error while sending hangouts reply", e);
       }
     } else {
       // parseWhatsappRequest(event);
@@ -102,7 +102,8 @@ public class ChatServiceController {
     return reply;
   }
 
-  private ChatServiceRequest parseHangoutsRequest(final JsonNode event) throws Exception {
+  private ChatServiceRequest BuildChatServiceRequestFromHangoutsRequest(final JsonNode event)
+      throws Exception {
     if ("ROOM".equals(event.at("/space/type").asText())) {
       throw new IllegalArgumentException("The message was received from a room");
     }
@@ -123,7 +124,6 @@ public class ChatServiceController {
         chatServiceRequestBuilder.setRequestType(RequestType.MESSAGE);
         chatServiceRequestBuilder = parseHangoutsCardClick(chatServiceRequestBuilder, event);
         break;
-        // throw new IllegalArgumentException("Nothing much");
       default:
         throw new IllegalArgumentException("The request has no event type");
     }
@@ -177,8 +177,9 @@ public class ChatServiceController {
         final ChatServiceRequest.Builder chatServiceRequestBuilder, final JsonNode event) {
     final ChatServiceRequest.Sender.Builder senderBuilder = ChatServiceRequest.Sender.newBuilder()
         .setDisplayName(event.at("/user/displayName").asText())
-        .setChatClientGeneratedId(event.at("/space/name").asText().substring(7))
-        .setUserId(event.at("/user/name").asText().substring(6));
+        .setChatClientGeneratedId(event.at("/space/name").asText()
+        .substring(IDMapping.SPACEID_PREFIX_LENGTH))
+        .setUserId(event.at("/user/name").asText().substring(IDMapping.USERID_PREFIX_LENGTH));
     chatServiceRequestBuilder.setSender(senderBuilder); 
     return chatServiceRequestBuilder;
   }

@@ -15,6 +15,8 @@ import com.google.protobuf.Struct;
 import com.google.pubsub.v1.ProjectSubscriptionName;
 import com.google.pubsub.v1.PubsubMessage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -23,22 +25,23 @@ public class PubSubPullSubscriber {
 
   @Autowired
   private AsyncService asyncService;
+  private static final Logger logger = LoggerFactory.getLogger(PubSubPullSubscriber.class);
   private static String projectID;
   private static String subscriptionID;
-  private static final String TRIGGER_EVENT_MESSAGE = "TriggerEvent";
-  private static final String SUGGEST_CATEGORY_CHANGE_EVENT = "SUGGEST_CATEGORY_CHANGE";
-  private static final String SUGGEST_IMAGE_UPLOAD_EVENT = "SUGGEST_IMAGE_UPLOAD";
   private static Long maxOutstandingElements;
   private static Long maxOutstandingBytes;
+  private static int threadCount;
 
   public PubSubPullSubscriber(
       @Value("${pubsubConfig.maxOutstandingElements}") final String maxOutstandingElementsToSet,
-      @Value("${pubsubConfig.maxOutstandingBytes}") final String maxOutstandingBytesToSet)
+      @Value("${pubsubConfig.maxOutstandingBytes}") final String maxOutstandingBytesToSet,
+      @Value("${pubsubConfig.threadCount}") final String threadCountToSet)
       throws InterruptedException {
     projectID = System.getenv("projectID");
     subscriptionID = System.getenv("subscriptionID");
     maxOutstandingElements = Long.parseLong(maxOutstandingElementsToSet);
     maxOutstandingBytes = Long.parseLong(maxOutstandingBytesToSet);
+    threadCount = Integer.parseInt(threadCountToSet);
     launchSubscriber();
   }
 
@@ -50,13 +53,13 @@ public class PubSubPullSubscriber {
         (final PubsubMessage message, final AckReplyConsumer consumer) -> {
       final String messageData = message.getData().toStringUtf8();
       final Map<String, String> messageAttributesMap = message.getAttributesMap();
-      if(messageData.equals(TRIGGER_EVENT_MESSAGE)) {
+      if(messageData.equals(ChatServiceConstants.TRIGGER_EVENT_MESSAGE)) {
         final TriggerEventNotification triggerEventNotification = 
             buildNotificationFromMessage(messageAttributesMap);
         try {
           asyncService.triggerEventHandler(triggerEventNotification);
         } catch (final Exception e) {
-          e.printStackTrace();
+          logger.error("Error while handling event trigger", e);
         }
       } else {
         throw new IllegalArgumentException("Unknown message received at subscriber");
@@ -68,7 +71,7 @@ public class PubSubPullSubscriber {
         .setMaxOutstandingRequestBytes(maxOutstandingBytes)
         .build();
     final ExecutorProvider executorProvider = InstantiatingExecutorProvider.newBuilder()
-        .setExecutorThreadCount(4)
+        .setExecutorThreadCount(threadCount)
         .build();
     final Subscriber subscriber = Subscriber.newBuilder(subscriptionName, receiver)
         .setFlowControlSettings(flowControlSettings)
@@ -102,7 +105,7 @@ public class PubSubPullSubscriber {
     } 
     if(messageAttributesMap.containsKey("event")) {
       switch (messageAttributesMap.get("event")) {
-        case SUGGEST_CATEGORY_CHANGE_EVENT:
+        case ChatServiceConstants.SUGGEST_CATEGORY_CHANGE_EVENT:
           final com.google.protobuf.Value suggestedCategory = com.google.protobuf.Value.newBuilder()
               .setStringValue(messageAttributesMap.get("suggestedCategory")).build();
           final Struct eventParams =
@@ -110,7 +113,7 @@ public class PubSubPullSubscriber {
           triggerEventNotificationBuilder
               .setEvent(Event.SUGGEST_CATEGORY_CHANGE).setEventParams(eventParams);
           break;
-        case SUGGEST_IMAGE_UPLOAD_EVENT:
+        case ChatServiceConstants.SUGGEST_IMAGE_UPLOAD_EVENT:
           triggerEventNotificationBuilder.setEvent(Event.SUGGEST_IMAGE_UPLOAD);
           break;
         default:

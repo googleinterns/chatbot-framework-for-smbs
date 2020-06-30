@@ -1,8 +1,6 @@
 package com.chatbot.services;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.chatbot.services.protobuf.ChatServiceRequestOuterClass.ChatServiceRequest;
@@ -29,10 +27,6 @@ public class AsyncService {
   private static final String THANKS_FOR_ADDING_MESSAGE = "Thank You for Adding me";
   private static final String NOT_EXPECTING_IMAGE_MESSAGE =
       "Sorry, we were not expecting any attachements from you.";
-  private static final String EXPECTING_IMAGES_CONTEXT = "expectingimagescontext";
-  private static final List<String> LIST_OF_INTENTS_WITH_INTERACTIVE_RESPONSE = new ArrayList<>(
-    Arrays.asList("Default Welcome Intent", "Default Fallback Intent", "NotGettingEnoughCalls")
-  );
   
   @Async("asyncExecutor")
   public void hangoutsAsyncHandler(final ChatServiceRequest chatServiceRequest) throws Exception {
@@ -46,39 +40,44 @@ public class AsyncService {
       case REMOVED:
         break;
       case MESSAGE:
-        // The spaceID of the user is used as the sessionID for hangouts
-        final DialogflowConversation dialogflowConversation =
-            new DialogflowConversation(System.getenv("projectID"), spaceID);
-        if (chatServiceRequest.getUserMessage().getAttachmentsCount() == 0) {
-          final Value userID = Value.newBuilder()
-              .setStringValue(chatServiceRequest.getSender().getUserId()).build();
-          final Struct payload = Struct.newBuilder()
-              .putFields("userID", userID)
-              .build();
-          final QueryResult queryResult = dialogflowConversation.sendMessage(
-              chatServiceRequest.getUserMessage().getText(), payload);
-          final String response = queryResult.getFulfillmentText();
-          if(LIST_OF_INTENTS_WITH_INTERACTIVE_RESPONSE
-              .contains(queryResult.getIntent().getDisplayName())) {
-            hangoutsMessageSender.sendCardMessage(spaceID, response);  
-          } else {
-            hangoutsMessageSender.sendMessage(spaceID, response);
-          }
-        } else {
-          final List<String> currentContextList = dialogflowConversation.getCurrentContexts();
-          if (currentContextList.contains(EXPECTING_IMAGES_CONTEXT)) {
-            // send images to backend
-            hangoutsMessageSender.sendMessage(
-              chatServiceRequest.getSender().getChatClientGeneratedId(), IMAGES_RECEIVED_MESSAGE);
-          } else {
-            hangoutsMessageSender
-                .sendMessage(chatServiceRequest.getSender().getChatClientGeneratedId(),
-                NOT_EXPECTING_IMAGE_MESSAGE);
-          }
-        }
+        handleMessageEvent(chatServiceRequest);
         break;
       default:
         break;
+    }
+  }
+
+  private void handleMessageEvent(ChatServiceRequest chatServiceRequest) throws Exception {
+    final String spaceID = chatServiceRequest.getSender().getChatClientGeneratedId();
+    // The spaceID of the user is used as the sessionID for hangouts
+    final DialogflowConversation dialogflowConversation =
+        new DialogflowConversation(System.getenv("projectID"), spaceID);
+    if (chatServiceRequest.getUserMessage().getAttachmentsCount() == 0) {
+      final Value userID = Value.newBuilder()
+          .setStringValue(chatServiceRequest.getSender().getUserId()).build();
+      final Struct payload = Struct.newBuilder()
+          .putFields("userID", userID)
+          .build();
+      final QueryResult queryResult = dialogflowConversation.sendMessage(
+          chatServiceRequest.getUserMessage().getText(), payload);
+      final String response = queryResult.getFulfillmentText();
+      if(ChatServiceConstants.LIST_OF_INTENTS_WITH_INTERACTIVE_RESPONSE
+          .contains(queryResult.getIntent().getDisplayName())) {
+        hangoutsMessageSender.sendCardMessage(spaceID, response);  
+      } else {
+        hangoutsMessageSender.sendMessage(spaceID, response);
+      }
+    } else {
+      final List<String> currentContextList = dialogflowConversation.getCurrentContexts();
+      if (currentContextList.contains(ChatServiceConstants.EXPECTING_IMAGES_CONTEXT)) {
+        // send images to backend
+        hangoutsMessageSender.sendMessage(
+          chatServiceRequest.getSender().getChatClientGeneratedId(), IMAGES_RECEIVED_MESSAGE);
+      } else {
+        hangoutsMessageSender
+            .sendMessage(chatServiceRequest.getSender().getChatClientGeneratedId(),
+            NOT_EXPECTING_IMAGE_MESSAGE);
+      }
     }
   }
 
@@ -102,7 +101,7 @@ public class AsyncService {
     }
   }
 
-  @Async
+  @Async("asyncExecutor")
   public void sendMessageUsingChatClientGeneratedID(final String chatClientGeneratedID,
       final String message, final ChatClient chatClient) throws IOException {
     switch (chatClient) {
@@ -116,7 +115,7 @@ public class AsyncService {
     }
   }
 
-  @Async
+  @Async("asyncExecutor")
   public void triggerEventHandler(final TriggerEventNotification triggerEventNotification)
       throws Exception {
     final ChatClient chatClient =
@@ -131,10 +130,16 @@ public class AsyncService {
     final Struct payload = Struct.newBuilder()
         .putFields("userID", userIDValue)
         .build();
-    final String triggerResponse = dialogflowConversation
+    final QueryResult triggerResponse = dialogflowConversation
         .triggerEvent(triggerEventNotification.getEvent().name(),
         triggerEventNotification.getEventParams(), payload);
-    sendMessageUsingChatClientGeneratedID(chatClientGeneratedID, triggerResponse, chatClient);
+    final String response = triggerResponse.getFulfillmentText();
+    if(ChatServiceConstants.LIST_OF_INTENTS_WITH_INTERACTIVE_RESPONSE
+        .contains(triggerResponse.getIntent().getDisplayName())) {
+      hangoutsMessageSender.sendCardMessage(chatClientGeneratedID, response);  
+    } else {
+      hangoutsMessageSender.sendMessage(chatClientGeneratedID, response);
+    }
   }
 
   @Async("asyncExecutor")

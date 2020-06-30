@@ -21,18 +21,6 @@ public class DialogflowFulfillmentController {
   @Autowired
   private AsyncService asyncService;
 
-  private static final String SUGGEST_SERVICE_TIME_CHANGE = "SuggestServiceTimeChange";
-  private static final String CHANGE_SERVICE_TIME = "ChangeServiceTime";
-  private static final String PROVIDE_TARGETED_QUERIES_INTENT_NAME = "ProvideTargetedQueries";
-  private static final String RECOMMEND_MORE_OPTIONS_INTENT_NAME = "RecommendMoreOptions";
-  private static final String CHANGE_CATEGORY_INTENT_NAME = "ChangeCategory";
-  private static final String EXPLAIN_MEANING_INTENT_NAME = "ExplainMeaning";
-  private static final String UNRELATED_CALL_INTENT = "CallUnrelatedToBusinessCategory";
-  private static final String SUGGEST_TARGET_AREA_CHANGE = "SuggestTargetAreaChange";
-  private static final String CHANGE_TARGET_AREA = "ChangeTargetArea";
-  private static final String CALL_FROM_OUTSIDE_SERVICE_AREA_INTENT = 
-      "CallFromOutsideServiceArea";
-
   private static Map<String, String> parameterMap = new HashMap<>();
 
   @PostMapping("/dgf")
@@ -51,45 +39,45 @@ public class DialogflowFulfillmentController {
       parameterMap.put(paramName, parameters.get(paramName).asText());
     }
     switch (intentName) {
-      case CHANGE_CATEGORY_INTENT_NAME:
+      case ChatServiceConstants.CHANGE_CATEGORY_INTENT_NAME:
         // change the category to paramMap.get("suggestedCategory") for userID
         asyncService.sendMessageUsingUserID(userID, buildCategoryChangedMessage(parameterMap
             .get("suggestedCategory")), ChatClient.HANGOUTS, false);
         break;
-      case RECOMMEND_MORE_OPTIONS_INTENT_NAME:
+      case ChatServiceConstants.RECOMMEND_MORE_OPTIONS_INTENT_NAME:
         // get all alternatives for the userID
         asyncService.sendMessageUsingUserID(userID, buildRecommendMoreOptionsMessage(),
-            ChatClient.HANGOUTS, false);
+            ChatClient.HANGOUTS, true);
         break;
-      case PROVIDE_TARGETED_QUERIES_INTENT_NAME:
+      case ChatServiceConstants.PROVIDE_TARGETED_QUERIES_INTENT_NAME:
         // get targeted queries for the paramMap.get("suggestedCategory")
         asyncService.sendMessageUsingUserID(userID, buildTargetedQueriesMessage(parameterMap
             .get("suggestedCategory")), ChatClient.HANGOUTS, false);
         break;
-      case EXPLAIN_MEANING_INTENT_NAME:
+      case ChatServiceConstants.EXPLAIN_MEANING_INTENT_NAME:
         // get information about the category paramMap.get("suggestedCategory")
         asyncService.sendMessageUsingUserID(userID, buildExplainMeaningMessage(parameterMap
             .get("suggestedCategory")), ChatClient.HANGOUTS, false);
-      case CALL_FROM_OUTSIDE_SERVICE_AREA_INTENT:
+      case ChatServiceConstants.CALL_FROM_OUTSIDE_SERVICE_AREA_INTENT:
         // parameterMap.get("mobileNumber")) was from outside of the service area of userID
         break;
-      case UNRELATED_CALL_INTENT:
+      case ChatServiceConstants.UNRELATED_CALL_INTENT:
         //  parameterMap.get("mobileNumber")) was unrelated for userID
         break;
-      case SUGGEST_TARGET_AREA_CHANGE:
+      case ChatServiceConstants.SUGGEST_TARGET_AREA_CHANGE:
         asyncService.sendMessageUsingUserID(userID, buildTargetAreaSuggestionMessage(),
             ChatClient.HANGOUTS, true);
         break;
-      case CHANGE_TARGET_AREA:
+      case ChatServiceConstants.CHANGE_TARGET_AREA:
         // change target area to parameterMap.get("radius.original") 
         asyncService.sendMessageUsingUserID(userID, buildTargetAreaChangedMessage(
             parameterMap.get("radius.original")), ChatClient.HANGOUTS, false);
         break;
-      case SUGGEST_SERVICE_TIME_CHANGE:
+      case ChatServiceConstants.SUGGEST_SERVICE_TIME_CHANGE:
         asyncService.sendMessageUsingUserID(userID, buildServiceTimingSuggestionMessage(),
             ChatClient.HANGOUTS, true);
         break;
-        case CHANGE_SERVICE_TIME:
+        case ChatServiceConstants.CHANGE_SERVICE_TIME:
           // change service time to parameters.get("startTime.original") to
           // parameters.get("endTime.original")
           asyncService.sendMessageUsingUserID(userID, buildServiceTimingChangedMessage(
@@ -110,7 +98,7 @@ public class DialogflowFulfillmentController {
   }
 
   private static String buildRecommendMoreOptionsMessage() {
-    return "You can also change your category to A, B or C";
+    return "You can also change your category to any of these:\nDiner\nHotel\nBistro";
   }
 
   private static String buildTargetedQueriesMessage(final String suggestedCategory) {
@@ -122,11 +110,11 @@ public class DialogflowFulfillmentController {
   }
 
   private static String buildTargetAreaSuggestionMessage() {
-    return "Please choose one:\nChange it to 5Km\nChange it to 4Km\nChange it to 3Km";
+    return "\nChange target city to Hyderabad\nChange target radius to 10Km\nChange target radius to 20Km";
   }
 
   private static String buildTargetAreaChangedMessage(final String radius) {
-    return "Your target area has been changed to " + radius;
+    return "Your target radius has been changed to " + radius;
   }
 
   private static String buildServiceTimingSuggestionMessage() {

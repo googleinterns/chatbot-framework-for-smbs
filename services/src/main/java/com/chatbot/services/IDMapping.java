@@ -27,7 +27,8 @@ public class IDMapping {
   private static String CHAT_SCOPE;
   private static Map<ChatClient, BiMap<String, String>> ChatClientToChatClientBiMapMapping;
   private static final String SERVICE_ACCOUNT_FILE = "/service-acct.json";
-  
+  static final int SPACEID_PREFIX_LENGTH = 7;
+  static final int USERID_PREFIX_LENGTH = 6;
   public IDMapping(@Value("${hangoutsAPIScope}") final String apiScope)
       throws GeneralSecurityException, IOException {
     CHAT_SCOPE = apiScope;
@@ -52,8 +53,9 @@ public class IDMapping {
       final List<Membership> memebershipList = 
           chatService.spaces().members().list(spaceName).execute().getMemberships();
       for (final Membership membership : memebershipList) {
-        ChatClientToChatClientBiMapMapping.get(ChatClient.HANGOUTS).put(spaceName.substring(7),
-            membership.getMember().getName().substring(6));
+        ChatClientToChatClientBiMapMapping.get(ChatClient.HANGOUTS)
+            .put(spaceName.substring(SPACEID_PREFIX_LENGTH),
+            membership.getMember().getName().substring(USERID_PREFIX_LENGTH));
       }
     }
   }

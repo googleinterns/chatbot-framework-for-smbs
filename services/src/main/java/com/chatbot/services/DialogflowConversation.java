@@ -16,19 +16,13 @@ import com.google.cloud.dialogflow.v2.EventInput;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 public class DialogflowConversation {
 
   private static String projectID;
   private final String langCode;
   private final String sessionID;
-  private static Map<String, List<String>> EVENT_TO_CONTEXT_MAPPING = Map.of(
-      "SUGGEST_CATEGORY_CHANGE", Arrays.asList("SuggestChangeCatgeoryContext"),
-      "SUGGEST_IMAGE_UPLOAD", Arrays.asList("SuggestImageUploadContext"),
-      "GET_CALL_FEEDBACK", Arrays.asList("GetCallFeedbackContext")); 
 
   public DialogflowConversation(final String projectIDToSet, final String langCodeToSet,
       final String sessionIDToSet) {
@@ -38,9 +32,7 @@ public class DialogflowConversation {
   }
 
   public DialogflowConversation(final String projectIDToSet, final String sessionIDToSet) {
-    projectID = projectIDToSet;
-    langCode = "en";
-    sessionID = sessionIDToSet;
+    this(projectIDToSet, "en", sessionIDToSet);
   }
 
   // function to get the response for a user message from dialogflow
@@ -56,14 +48,12 @@ public class DialogflowConversation {
           DetectIntentRequest.newBuilder().setSession(session.toString()).setQueryInput(queryInput)
           .setQueryParams(queryParameters).build();
       final DetectIntentResponse response = sessionsClient.detectIntent(detectIntentRequest);
-      // final QueryResult queryResult = response.getQueryResult();
       return response.getQueryResult();
-      // return queryResult.getFulfillmentText();
     }
   }
 
   // function to get the response for an event from dialogflow
-  public String triggerEvent(final String event, final Struct parameters, final Struct payload)
+  public QueryResult triggerEvent(final String event, final Struct parameters, final Struct payload)
       throws Exception {
     try (SessionsClient sessionsClient = SessionsClient.create()) {
       final SessionName session = SessionName.of(projectID, sessionID);
@@ -82,12 +72,11 @@ public class DialogflowConversation {
           .build();
       // before triggering an event, we would need to set the context to the input context of the
       // intent that we want to be matched
-      for(final String contextName : EVENT_TO_CONTEXT_MAPPING.get(event)) {
+      for(final String contextName : ChatServiceConstants.EVENT_TO_CONTEXT_MAPPING.get(event)) {
         setContextForSession(contextName);
       }
       final DetectIntentResponse response = sessionsClient.detectIntent(detectIntentRequest);
-      final QueryResult queryResult = response.getQueryResult();
-      return queryResult.getFulfillmentText();
+      return response.getQueryResult();
     }
   }
 
@@ -112,8 +101,7 @@ public class DialogflowConversation {
     try (ContextsClient contextsClient = ContextsClient.create()) {
       final SessionName session = SessionName.of(projectID, sessionID);
       for (final Context context : contextsClient.listContexts(session).iterateAll()) {
-        // the name returned is the complete path of the context, of which we only need
-        // the name
+        // the name returned is the complete path of the context, of which we only need the name
         final String[] contextNameParts = context.getName().split("/");
         contextList.add(contextNameParts[contextNameParts.length - 1]);
       }
