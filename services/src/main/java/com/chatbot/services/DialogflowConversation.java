@@ -29,19 +29,19 @@ public class DialogflowConversation {
   private final String langCode;
   private final String sessionID;
 
-  public DialogflowConversation(final String projectIDToSet, final String langCodeToSet,
+  DialogflowConversation(final String projectIDToSet, final String langCodeToSet,
       final String sessionIDToSet) {
     projectID = projectIDToSet;
     langCode = langCodeToSet;
     sessionID = sessionIDToSet;
   }
 
-  public DialogflowConversation(final String projectIDToSet, final String sessionIDToSet) {
+  DialogflowConversation(final String projectIDToSet, final String sessionIDToSet) {
     this(projectIDToSet, "en", sessionIDToSet);
   }
 
   // function to get the response for a user message from dialogflow
-  public QueryResult sendMessage(final String message, final Struct payload) throws Exception {
+  QueryResult sendMessage(final String message, final Struct payload) throws Exception {
     try (SessionsClient sessionsClient = SessionsClient.create()) {
       final SessionName session = SessionName.of(projectID, sessionID);
       final TextInput.Builder textInput = TextInput.newBuilder().setText(message)
@@ -58,7 +58,7 @@ public class DialogflowConversation {
   }
 
   // function to get the response for an event from dialogflow
-  public QueryResult triggerEvent(final String event, final Struct parameters, final Struct payload)
+  QueryResult triggerEvent(final String event, final Struct parameters, final Struct payload)
       throws Exception {
     try (SessionsClient sessionsClient = SessionsClient.create()) {
       final SessionName session = SessionName.of(projectID, sessionID);
@@ -81,7 +81,7 @@ public class DialogflowConversation {
           .forEach(contextName -> {
             try {
               setContextForSession(contextName);
-            } catch (IOException e) {
+            } catch (final IOException e) {
               logger.error("Error while setting contexts for session", e);
             }
           });
@@ -91,7 +91,7 @@ public class DialogflowConversation {
   }
 
 
-  public void setContextForSession(final String ContextName) throws IOException {
+  void setContextForSession(final String ContextName) throws IOException {
     try (ContextsClient contextsClient = ContextsClient.create()) {
       final SessionName parent = SessionName.of(projectID, sessionID);
       final Context context = Context
@@ -106,7 +106,7 @@ public class DialogflowConversation {
     }
   }
 
-  public List<String> getCurrentContexts() throws Exception {
+  List<String> getCurrentContexts() throws Exception {
     final List<String> contextList = new ArrayList<String>();
     try (ContextsClient contextsClient = ContextsClient.create()) {
       final SessionName session = SessionName.of(projectID, sessionID);

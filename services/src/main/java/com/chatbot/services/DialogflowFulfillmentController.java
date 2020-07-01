@@ -24,7 +24,7 @@ public class DialogflowFulfillmentController {
   private static Map<String, String> parameterMap = new HashMap<>();
 
   @PostMapping("/dgf")
-  public String onEvent(@RequestHeader final Map<String, String> headers,
+  String onEvent(@RequestHeader final Map<String, String> headers,
       @RequestBody final JsonNode event) throws JsonParseException, IOException,
       IllegalArgumentException {
     if(!headers.get("authorization").equals(System.getenv("dialogflowAuthToken"))) {

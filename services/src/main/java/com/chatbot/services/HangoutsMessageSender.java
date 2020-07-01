@@ -35,7 +35,7 @@ public class HangoutsMessageSender {
   private static HttpRequestInitializer requestInitializer;
   private static HangoutsChat chatService;
 
-  public HangoutsMessageSender(@Value("${hangoutsAPIScope}") final String apiScope,
+  HangoutsMessageSender(@Value("${hangoutsAPIScope}") final String apiScope,
       @Value("${credentialsFile}") final String credentialsFile) throws GeneralSecurityException,
       IOException {
     CHAT_SCOPE = apiScope;
@@ -49,7 +49,7 @@ public class HangoutsMessageSender {
         .setApplicationName("chatbot").build();
   }
 
-  public void sendMessage(final String spaceID, final String msg) throws IOException {
+  void sendMessage(final String spaceID, final String msg) throws IOException {
     if(msg.isEmpty()) {
       return;
     }
@@ -57,7 +57,7 @@ public class HangoutsMessageSender {
     chatService.spaces().messages().create("spaces/" + spaceID, message).execute();
   }
 
-  public void sendCardMessage(final String spaceID, final String msg) throws IOException {
+  void sendCardMessage(final String spaceID, final String msg) throws IOException {
     final List<String> messageParts = new ArrayList<>(Arrays.asList(msg.split("\n")));
     final List<Section> sectionList = new ArrayList<>();
     for (final String option : messageParts.subList(1, messageParts.size())) {

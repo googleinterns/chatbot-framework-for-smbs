@@ -34,7 +34,7 @@ public class PubSubController {
       .build();
 
   @PostMapping("/pubsub")
-  public String onRequest(@RequestHeader final Map<String, String> headers,
+  String onRequest(@RequestHeader final Map<String, String> headers,
       @RequestBody final JsonNode message) throws Exception {
     final String authorizationHeader = headers.get("authorization");
     // authorization header format: `authorization <token>`

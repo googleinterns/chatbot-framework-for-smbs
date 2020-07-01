@@ -22,14 +22,13 @@ public class AsyncService {
   @Autowired
   private IDMapping iDMapping;
 
-
   private static final String IMAGES_RECEIVED_MESSAGE = "The images have been received!";
   private static final String THANKS_FOR_ADDING_MESSAGE = "Thank You for Adding me";
   private static final String NOT_EXPECTING_IMAGE_MESSAGE =
       "Sorry, we were not expecting any attachements from you.";
   
   @Async("asyncExecutor")
-  public void hangoutsAsyncHandler(final ChatServiceRequest chatServiceRequest) throws Exception {
+  void hangoutsAsyncHandler(final ChatServiceRequest chatServiceRequest) throws Exception {
     final String spaceID = chatServiceRequest.getSender().getChatClientGeneratedId();
     switch (chatServiceRequest.getRequestType()) {
       case ADDED:
@@ -47,7 +46,7 @@ public class AsyncService {
     }
   }
 
-  private void handleMessageEvent(ChatServiceRequest chatServiceRequest) throws Exception {
+  void handleMessageEvent(final ChatServiceRequest chatServiceRequest) throws Exception {
     final String spaceID = chatServiceRequest.getSender().getChatClientGeneratedId();
     // The spaceID of the user is used as the sessionID for hangouts
     final DialogflowConversation dialogflowConversation =
@@ -82,16 +81,16 @@ public class AsyncService {
   }
 
   @Async("asyncExecutor")
-  public void sendMessageUsingUserID(final String userID, final String message,
+  void sendMessageUsingUserID(final String userID, final String message,
       final ChatClient chatClient, final boolean isCard) throws IOException {
     switch (chatClient) {
       case HANGOUTS:
         if(isCard) {
           hangoutsMessageSender.sendCardMessage(
-              iDMapping.getChatClientGeneratedID(userID,ChatClient.HANGOUTS), message);
+              iDMapping.getChatClientGeneratedID(userID, ChatClient.HANGOUTS), message);
         } else {
           hangoutsMessageSender.sendMessage(
-              iDMapping.getChatClientGeneratedID(userID,ChatClient.HANGOUTS), message);
+              iDMapping.getChatClientGeneratedID(userID, ChatClient.HANGOUTS), message);
         }
         break;
       case WHATSAPP:
@@ -102,11 +101,15 @@ public class AsyncService {
   }
 
   @Async("asyncExecutor")
-  public void sendMessageUsingChatClientGeneratedID(final String chatClientGeneratedID,
-      final String message, final ChatClient chatClient) throws IOException {
+  void sendMessageUsingChatClientGeneratedID(final String chatClientGeneratedID,
+      final String message, final ChatClient chatClient, final boolean isCard) throws IOException {
     switch (chatClient) {
       case HANGOUTS:
-        hangoutsMessageSender.sendMessage(chatClientGeneratedID, message);
+        if(isCard) {
+          hangoutsMessageSender.sendCardMessage(chatClientGeneratedID, message);
+        } else {
+          hangoutsMessageSender.sendMessage(chatClientGeneratedID, message);
+        }
         break;
       case WHATSAPP:
         // send whatsapp message
@@ -116,7 +119,7 @@ public class AsyncService {
   }
 
   @Async("asyncExecutor")
-  public void triggerEventHandler(final TriggerEventNotification triggerEventNotification)
+  void triggerEventHandler(final TriggerEventNotification triggerEventNotification)
       throws Exception {
     final ChatClient chatClient =
         ChatClient.valueOf(triggerEventNotification.getChatClient().name());
@@ -143,7 +146,6 @@ public class AsyncService {
   }
 
   @Async("asyncExecutor")
-  public void whatsappAsyncHandler(final ChatServiceRequest chatServiceRequest) {
+  void whatsappAsyncHandler(final ChatServiceRequest chatServiceRequest) {
   }
-
 }

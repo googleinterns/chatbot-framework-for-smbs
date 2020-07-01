@@ -32,7 +32,7 @@ public class PubSubPullSubscriber {
   private static Long maxOutstandingBytes;
   private static int threadCount;
 
-  public PubSubPullSubscriber(
+  PubSubPullSubscriber(
       @Value("${pubsubConfig.maxOutstandingElements}") final String maxOutstandingElementsToSet,
       @Value("${pubsubConfig.maxOutstandingBytes}") final String maxOutstandingBytesToSet,
       @Value("${pubsubConfig.threadCount}") final String threadCountToSet)

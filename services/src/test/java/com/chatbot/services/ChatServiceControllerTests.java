@@ -16,15 +16,14 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ChatServiceControllerTests {
 
-
-    static JsonNode textMessageNode;
-    static JsonNode attachmentMessageNode;
-    static JsonNode messageFromRoomNode;
-    static JsonNode messageWithNoTypeNode;
-    static JsonNode messageWithInvalidSenderNode;
-    static JsonNode messageWithNoSenderInfoNode;
-    static JsonNode messageWithCardClickNode;
-    static JsonNode messageWithInvalidCardClickNode;
+    private static JsonNode textMessageNode;
+    private static JsonNode attachmentMessageNode;
+    private static JsonNode messageFromRoomNode;
+    private static JsonNode messageWithNoTypeNode;
+    private static JsonNode messageWithInvalidSenderNode;
+    private static JsonNode messageWithNoSenderInfoNode;
+    private static JsonNode messageWithCardClickNode;
+    private static JsonNode messageWithInvalidCardClickNode;
 
     @BeforeClass
     public static void setUpEventObjects() throws IOException {

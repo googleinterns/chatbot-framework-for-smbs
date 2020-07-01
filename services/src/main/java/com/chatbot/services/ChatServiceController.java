@@ -47,7 +47,7 @@ public class ChatServiceController {
   private static final String AUDIENCE = System.getenv("projectNumber");
 
   @PostMapping("/")
-  public Message onRequest(@RequestHeader final Map<String, String> headers,
+  Message onRequest(@RequestHeader final Map<String, String> headers,
       @RequestBody final JsonNode event) throws IOException, GeneralSecurityException {
     if (headers.get("user-agent").equals(ChatServiceConstants.HANGOUTS_USER_AGENT)) {
       // authorization header format: `authorization <token>`
@@ -133,7 +133,8 @@ public class ChatServiceController {
 
   static ChatServiceRequest.Builder parseHangoutsUserMessage(
       final ChatServiceRequest.Builder chatServiceRequestBuilder, final JsonNode event) {
-    final ChatServiceRequest.UserMessage.Builder userMessageBuilder = ChatServiceRequest.UserMessage.newBuilder();
+    final ChatServiceRequest.UserMessage.Builder userMessageBuilder =
+        ChatServiceRequest.UserMessage.newBuilder();
     if (event.at("/message").has("attachment")) {
       if (event.at("/message").has("argumentText")) {
         userMessageBuilder.setText(event.at("/message/argumentText").asText());
@@ -141,7 +142,8 @@ public class ChatServiceController {
       final Iterator<JsonNode> attachmentIterator = event.at("/message/attachment").elements();
       while (attachmentIterator.hasNext()) {
         final JsonNode attachment = (JsonNode) attachmentIterator.next();
-        final ChatServiceRequest.Attachment.Builder attachmentBuilder = ChatServiceRequest.Attachment.newBuilder();
+        final ChatServiceRequest.Attachment.Builder attachmentBuilder =
+            ChatServiceRequest.Attachment.newBuilder();
         attachmentBuilder.setLink(attachment.at("/downloadUri").asText());
         switch (attachment.at("/contentType").asText()) {
           case "image/png":
@@ -165,7 +167,8 @@ public class ChatServiceController {
   static ChatServiceRequest.Builder parseHangoutsCardClick(
       final ChatServiceRequest.Builder chatServiceRequestBuilder, final JsonNode event)
       throws IllegalArgumentException {
-    final ChatServiceRequest.UserMessage.Builder userMessageBuilder = ChatServiceRequest.UserMessage.newBuilder();
+    final ChatServiceRequest.UserMessage.Builder userMessageBuilder =
+        ChatServiceRequest.UserMessage.newBuilder();
     if(!event.at("/action").has("parameters")) {
       throw new IllegalArgumentException("No card click parameters available");
     }

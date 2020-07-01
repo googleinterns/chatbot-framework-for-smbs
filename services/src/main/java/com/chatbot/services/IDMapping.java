@@ -33,8 +33,8 @@ public class IDMapping {
       throws GeneralSecurityException, IOException {
     CHAT_SCOPE = apiScope;
     ChatClientToChatClientBiMapMapping = new HashMap<ChatClient, BiMap<String, String>>();
-    ChatClientToChatClientBiMapMapping.put(ChatClient.WHATSAPP, HashBiMap.create(100));
-    ChatClientToChatClientBiMapMapping.put(ChatClient.HANGOUTS, HashBiMap.create(100));
+    ChatClientToChatClientBiMapMapping.put(ChatClient.WHATSAPP, HashBiMap.create());
+    ChatClientToChatClientBiMapMapping.put(ChatClient.HANGOUTS, HashBiMap.create());
     populateHangoutsBiMap();
   }
 
