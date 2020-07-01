@@ -4,13 +4,15 @@
   - Java 1.8
   - Maven
   - [protoc](https://github.com/protocolbuffers/protobuf/tree/master/src) compiler
+  - Keys for a service account with the Dialogflow API enabled
+ 
 
 ## Steps to run intent-gen
-- Add the service account key with dialogflow API enabled to `services/src/main/resources/service-acct.json`
+- Add the service account key to `intentgen/src/main/resources/service-acct.json`
 - Set the projectID environment
 
         export projectID=<projectID>
-- Add the protxt file describing the usecase to `services/src/main/resources`
+- Add the protxt file describing the usecase to `intentgen/src/main/resources`
 - Generate the intents
 
         mvn exec:java -D exec.mainClass=com.chatbot.IntentGenerator -D exec.args="-f usecase.prototxt"
@@ -28,4 +30,3 @@ The use cases must be described in a prototxt file for message described at [Use
 - `responses` - The list of responses to provide when the intent is matched.
 - `events` - This list of events that could match the intent.
 - `fulfillment_enabled` - Used to determine if fulfillments are enabled for the intent.
-
