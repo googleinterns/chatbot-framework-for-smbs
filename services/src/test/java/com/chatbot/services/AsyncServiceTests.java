@@ -41,7 +41,7 @@ public class AsyncServiceTests {
   static TriggerEventNotification triggerEventNotification;
 
   @Before
-  public void initMocks() throws Exception {
+  public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
     textMessageRequest = ChatServiceController.buildChatServiceRequestFromHangoutsRequest(
         (new ObjectMapper())
@@ -72,7 +72,7 @@ public class AsyncServiceTests {
   }
 
   @Test
-  public void sendMessageUsingUserID_testMessage() throws IOException {
+  public void sendMessageUsingUserID_textMessage() throws IOException {
     asyncService.sendMessageUsingUserID("123", "foo", ChatClient.HANGOUTS, false);
     verify(hangoutsMessageSender).sendMessage(anyString(), anyString());  
   }

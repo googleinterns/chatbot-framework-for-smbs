@@ -61,7 +61,7 @@ public class PubSubController {
     return "";
   }
 
-  private TriggerEventNotification buildNotificationFromMessage(final JsonNode message)
+  static TriggerEventNotification buildNotificationFromMessage(final JsonNode message)
       throws IllegalArgumentException {
     final TriggerEventNotification.Builder triggerEventNotificationBuilder = 
         TriggerEventNotification.newBuilder();
