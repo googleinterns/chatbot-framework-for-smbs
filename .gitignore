@@ -38,9 +38,11 @@ buildNumber.properties
 .settings/
 .vscode/
 *.classpath
+*.factorypath
 
 HELP.md
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**
 !**/src/test/**
+services/src/main/resources/service-acct.json
