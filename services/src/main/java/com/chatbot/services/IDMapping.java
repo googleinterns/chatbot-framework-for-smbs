@@ -19,6 +19,7 @@ import com.google.common.collect.HashBiMap;
 import com.chatbot.services.protobuf.ChatServiceRequestOuterClass.ChatServiceRequest.ChatClient;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +34,7 @@ public class IDMapping {
   public static final int SPACEID_PREFIX_LENGTH = 7;
   public static final int USERID_PREFIX_LENGTH = 6;
 
+  @Autowired
   public IDMapping(@Value("${hangoutsAPIScope}") final String apiScope,
       @Value("${credentialsFile}") final String credentialsFile) throws GeneralSecurityException,
       IOException {
