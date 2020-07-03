@@ -32,6 +32,7 @@ public class IDMapping {
   private static String SERVICE_ACCOUNT_FILE;
   public static final int SPACEID_PREFIX_LENGTH = 7;
   public static final int USERID_PREFIX_LENGTH = 6;
+
   public IDMapping(@Value("${hangoutsAPIScope}") final String apiScope,
       @Value("${credentialsFile}") final String credentialsFile) throws GeneralSecurityException,
       IOException {
@@ -41,6 +42,12 @@ public class IDMapping {
     ChatClientToChatClientBiMapMapping.put(ChatClient.WHATSAPP, HashBiMap.create());
     ChatClientToChatClientBiMapMapping.put(ChatClient.HANGOUTS, HashBiMap.create());
     populateHangoutsBiMap();
+  }
+
+  public IDMapping() {
+    ChatClientToChatClientBiMapMapping = new HashMap<ChatClient, BiMap<String, String>>();
+    ChatClientToChatClientBiMapMapping.put(ChatClient.WHATSAPP, HashBiMap.create());
+    ChatClientToChatClientBiMapMapping.put(ChatClient.HANGOUTS, HashBiMap.create());
   }
 
   // populate the IDs of Hangouts users
