@@ -38,6 +38,7 @@ buildNumber.properties
 .settings/
 .vscode/
 *.classpath
+*.factorypath
 
 HELP.md
 target/

@@ -29,11 +29,13 @@ public class IDMapping {
 
   private static String CHAT_SCOPE;
   private static Map<ChatClient, BiMap<String, String>> ChatClientToChatClientBiMapMapping;
-  private static final String SERVICE_ACCOUNT_FILE = "/service-acct.json";
+  private static String SERVICE_ACCOUNT_FILE;
   public static final int SPACEID_PREFIX_LENGTH = 7;
   public static final int USERID_PREFIX_LENGTH = 6;
-  public IDMapping(@Value("${hangoutsAPIScope}") final String apiScope)
-      throws GeneralSecurityException, IOException {
+  public IDMapping(@Value("${hangoutsAPIScope}") final String apiScope,
+      @Value("${credentialsFile}") final String credentialsFile) throws GeneralSecurityException,
+      IOException {
+    SERVICE_ACCOUNT_FILE = credentialsFile;
     CHAT_SCOPE = apiScope;
     ChatClientToChatClientBiMapMapping = new HashMap<ChatClient, BiMap<String, String>>();
     ChatClientToChatClientBiMapMapping.put(ChatClient.WHATSAPP, HashBiMap.create());
@@ -47,8 +49,8 @@ public class IDMapping {
         GoogleCredentials.fromStream(IDMapping.class.getResourceAsStream(SERVICE_ACCOUNT_FILE))
         .createScoped(CHAT_SCOPE);
     final HttpRequestInitializer requestInitializer = new HttpCredentialsAdapter(credentials);
-    HangoutsChat chatService;
-    chatService = new HangoutsChat.Builder(GoogleNetHttpTransport.newTrustedTransport(),
+    HangoutsChat chatService =
+        new HangoutsChat.Builder(GoogleNetHttpTransport.newTrustedTransport(),
         JacksonFactory.getDefaultInstance(),
         requestInitializer).setApplicationName("chatbot").build();
     final List<Space> spacesList = chatService.spaces().list().execute().getSpaces();
