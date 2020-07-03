@@ -1,16 +1,12 @@
 package com.chatbot.services.MessageSenders;
 
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.HttpRequestInitializer;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.services.chat.v1.HangoutsChat;
+import com.chatbot.services.HangoutsChatService;
 import com.google.api.services.chat.v1.model.ActionParameter;
 import com.google.api.services.chat.v1.model.Button;
 import com.google.api.services.chat.v1.model.Card;
@@ -20,33 +16,22 @@ import com.google.api.services.chat.v1.model.OnClick;
 import com.google.api.services.chat.v1.model.Section;
 import com.google.api.services.chat.v1.model.TextButton;
 import com.google.api.services.chat.v1.model.WidgetMarkup;
-import com.google.auth.http.HttpCredentialsAdapter;
-import com.google.auth.oauth2.GoogleCredentials;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-// class to handle sending of messages to hangouts users
+// This class handles the creation and sending of messages to Hangouts users
 
 @Component
 public class HangoutsMessageSender extends MessageSender{
-  private static String CHAT_SCOPE;
-  private static GoogleCredentials credentials;
-  private static HttpRequestInitializer requestInitializer;
-  private static HangoutsChat chatService;
 
-  HangoutsMessageSender(@Value("${hangoutsAPIScope}") final String apiScope,
-      @Value("${credentialsFile}") final String credentialsFile) throws GeneralSecurityException,
-      IOException {
-    CHAT_SCOPE = apiScope;
-    credentials = GoogleCredentials.fromStream(
-        HangoutsMessageSender.class.getResourceAsStream(credentialsFile))
-        .createScoped(CHAT_SCOPE);
-    requestInitializer = new HttpCredentialsAdapter(credentials);
-    chatService = new HangoutsChat.Builder(
-        GoogleNetHttpTransport.newTrustedTransport(),
-        JacksonFactory.getDefaultInstance(), requestInitializer)
-        .setApplicationName("chatbot").build();
+  private static final Logger logger = LoggerFactory.getLogger(HangoutsMessageSender.class);
+
+  public enum HANGOUTS_MESSAGE_TYPE {
+    TEXT,
+    CARD,
+    CARD_WITH_HEADER
   }
 
   // send message to a user using their chatClientGeneratedID (spaceID for hangouts)
@@ -55,21 +40,54 @@ public class HangoutsMessageSender extends MessageSender{
     if(msg.isEmpty()) {
       return;
     }
-    final Message message = new Message().setText(msg);
-    chatService.spaces()
+    sendMessage(chatClientGeneratedID, (new Message().setText(msg)));
+  }
+
+  public void sendMessage(final String chatClientGeneratedID, final Message message)
+      throws IOException {
+    HangoutsChatService.chatService.spaces()
         .messages()
         .create("spaces/" + chatClientGeneratedID, message)
         .execute();
   }
 
-  // send an interactive card message to a user using their chatClientGeneratedID
-  public void sendCardMessage(final String chatClientGeneratedID, final String msg)
-      throws IOException {
-    // responses to be sent as cards are newline seperated, the first line is the description and
-    // the following lines are options to be shown
-    final List<String> messageParts = new ArrayList<>(Arrays.asList(msg.split("\n")));
+  // generate the list of messages to send based on the type of the message
+  public static List<Message> generateMessageListByType(final String msg,
+      final HANGOUTS_MESSAGE_TYPE messageType) {
+    final List<Message> messageList = new ArrayList<>();
+    switch (messageType) {
+      case TEXT:
+        if(!msg.isEmpty()) {
+          messageList.add((new Message().setText(msg)));
+        }
+        break;
+      case CARD:
+        messageList.add(generateCardMessage(Arrays.asList(msg.split("\n"))));
+        break;
+      case CARD_WITH_HEADER:
+        final List<String> messageParts = Arrays.asList(msg.split("\n"));
+        messageList.add((new Message().setText(messageParts.get(0))));
+        messageList.add(generateCardMessage(messageParts.subList(1, messageParts.size())));
+    }
+    return messageList;
+  }
+
+  // send the message(s) to the user
+  public void sendMessageBasedOnMessageType(final String chatClientGeneratedID, final String msg,
+      final HANGOUTS_MESSAGE_TYPE messageType) {
+    generateMessageListByType(msg, messageType).forEach(message-> {
+      try {
+        sendMessage(chatClientGeneratedID, message);
+      } catch (final IOException e) {
+        logger.error("error sending hangouts message", e);
+      }
+    });
+  }
+
+  // create an interactive card message with given list as options
+  public static Message generateCardMessage(final List<String> options) {
     final List<Section> sectionList = new ArrayList<>();
-    for (final String option : messageParts.subList(1, messageParts.size())) {
+    for (final String option : options) {
       final List<WidgetMarkup> widgets = new ArrayList<>();
       final List<ActionParameter> customParameters = Collections
           .singletonList(new ActionParameter()
@@ -89,12 +107,6 @@ public class HangoutsMessageSender extends MessageSender{
     }
     final Card card =
         (new Card()).setSections(Collections.unmodifiableList(sectionList));
-    final Message message = new Message().setCards(Collections.singletonList(card));
-    // the description is sent first followed by the options
-    sendMessage(chatClientGeneratedID, messageParts.get(0));
-    chatService.spaces()
-        .messages()
-        .create("spaces/" + chatClientGeneratedID, message)
-        .execute();
+    return (new Message().setCards(Collections.singletonList(card)));
   }
 }
