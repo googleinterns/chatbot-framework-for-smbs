@@ -18,6 +18,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.chatbot.services.protobuf.ChatServiceRequestOuterClass.ChatServiceRequest.ChatClient;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -82,7 +83,7 @@ public class IDMapping {
         }
       }
     }
-    return "";
+    return StringUtils.EMPTY;
   }
 
   // get the user ID associated with a given chat client generated ID
@@ -94,7 +95,7 @@ public class IDMapping {
         }
       }
     }
-    return "";
+    return StringUtils.EMPTY;
   }
 
   // get the user ID associated with a given chat client generated ID and the chat client
@@ -102,6 +103,6 @@ public class IDMapping {
     if(ChatClientToChatClientBiMapMapping.get(chatClient).containsKey(chatClientGeneratedID)) {
       return ChatClientToChatClientBiMapMapping.get(chatClient).get(chatClientGeneratedID);
     }
-    return "";
+    return StringUtils.EMPTY;
   }
 }
