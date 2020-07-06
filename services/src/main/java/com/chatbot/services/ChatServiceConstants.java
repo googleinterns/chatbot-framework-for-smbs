@@ -5,7 +5,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
- public class ChatServiceConstants {
+// Collection of constants used in the package
+
+public class ChatServiceConstants {
   public static final Map<String, List<String>> EVENT_TO_CONTEXT_MAPPING = Map.of(
       "SUGGEST_CATEGORY_CHANGE", Arrays.asList("SuggestChangeCatgeoryContext"),
       "SUGGEST_IMAGE_UPLOAD", Arrays.asList("SuggestImageUploadContext"),

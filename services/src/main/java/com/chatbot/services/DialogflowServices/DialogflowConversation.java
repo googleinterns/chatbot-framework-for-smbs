@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+// Utilities to simplify conversations for a dialogflow sessions
+
 @Component
 public class DialogflowConversation {
 
