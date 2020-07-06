@@ -17,6 +17,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class IDMappingTests {
 
   static IDMapping iDMapping;
+
   @Mock
   static HangoutsChatService hangoutsChatService;
 
