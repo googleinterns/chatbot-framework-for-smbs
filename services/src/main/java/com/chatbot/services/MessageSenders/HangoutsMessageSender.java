@@ -19,14 +19,18 @@ import com.google.api.services.chat.v1.model.WidgetMarkup;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 // This class handles the creation and sending of messages to Hangouts users
 
 @Component
-public class HangoutsMessageSender extends MessageSender{
+public class HangoutsMessageSender extends MessageSender {
 
   private static final Logger logger = LoggerFactory.getLogger(HangoutsMessageSender.class);
+
+  @Autowired
+  HangoutsChatService hangoutsChatService;
 
   public enum HANGOUTS_MESSAGE_TYPE {
     TEXT,
@@ -45,7 +49,7 @@ public class HangoutsMessageSender extends MessageSender{
 
   public void sendMessage(final String chatClientGeneratedID, final Message message)
       throws IOException {
-    HangoutsChatService.chatService.spaces()
+    hangoutsChatService.getChatService().spaces()
         .messages()
         .create("spaces/" + chatClientGeneratedID, message)
         .execute();
