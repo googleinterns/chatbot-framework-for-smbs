@@ -16,7 +16,6 @@ import com.google.common.collect.HashBiMap;
 import com.chatbot.services.protobuf.ChatServiceRequestOuterClass.ChatServiceRequest.ChatClient;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 // This class handles the loading, updating and queries for the google user IDs and chat client
@@ -24,15 +23,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class IDMapping {
 
-  @Autowired
   HangoutsChatService hangoutsChatService;
 
   private static Map<ChatClient, BiMap<String, String>> ChatClientToChatClientBiMapMapping;
   public static final int SPACEID_PREFIX_LENGTH = 7;
   public static final int USERID_PREFIX_LENGTH = 6;
   
-  @Autowired
-  public IDMapping() throws GeneralSecurityException, IOException {
+  public IDMapping(final HangoutsChatService hangoutsChatServiceToSet)
+      throws GeneralSecurityException, IOException {
+    hangoutsChatService = hangoutsChatServiceToSet;
     ChatClientToChatClientBiMapMapping = new HashMap<ChatClient, BiMap<String, String>>();
     ChatClientToChatClientBiMapMapping.put(ChatClient.WHATSAPP, HashBiMap.create());
     ChatClientToChatClientBiMapMapping.put(ChatClient.HANGOUTS, HashBiMap.create());
