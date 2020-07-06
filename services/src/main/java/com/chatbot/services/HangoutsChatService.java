@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class HangoutsChatService {
   
-  public static HangoutsChat chatService;
+  private final HangoutsChat chatService;
 
   HangoutsChatService(@Value("${hangoutsAPIScope}") final String apiScope,
       @Value("${credentialsFile}") final String credentialsFile) throws GeneralSecurityException,
@@ -31,4 +31,7 @@ public class HangoutsChatService {
         .setApplicationName("chatbot").build();
   }
 
+  public HangoutsChat getChatService() {
+    return chatService;
+  } 
 }

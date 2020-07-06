@@ -2,22 +2,28 @@ package com.chatbot.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+
 import com.chatbot.services.protobuf.ChatServiceRequestOuterClass.ChatServiceRequest.ChatClient;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
 
 @RunWith(MockitoJUnitRunner.class)
 public class IDMappingTests {
 
-  private static IDMapping iDMapping;
+  static IDMapping iDMapping;
+  @Mock
+  static HangoutsChatService hangoutsChatService;
 
   @BeforeClass
-  public static void setUp() {
-    iDMapping = new IDMapping("chatClientID1", "userID1");
+  public static void setUp() throws GeneralSecurityException, IOException {
+    iDMapping = new IDMapping(hangoutsChatService);
+    iDMapping.addNewMapping("chatClientID1", "userID1", ChatClient.HANGOUTS);
   }
 
   @Test
