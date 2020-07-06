@@ -47,7 +47,7 @@ public class DialogflowConversation {
     langCode = langCodeToSet;
   }
 
-  // function to get the response for a user message from dialogflow
+  // function to send the user message to dialogflow 
   public QueryResult sendMessage(final String message, final Struct payload) throws Exception {
     try (SessionsClient sessionsClient = SessionsClient.create()) {
       final SessionName session = SessionName.of(projectID, sessionID);
@@ -56,15 +56,13 @@ public class DialogflowConversation {
       final QueryInput queryInput = QueryInput.newBuilder().setText(textInput).build();
       final QueryParameters queryParameters = QueryParameters.newBuilder().setPayload(payload)
           .build();
-      final DetectIntentRequest detectIntentRequest =
-          DetectIntentRequest.newBuilder().setSession(session.toString()).setQueryInput(queryInput)
-          .setQueryParams(queryParameters).build();
-      final DetectIntentResponse response = sessionsClient.detectIntent(detectIntentRequest);
+      final DetectIntentResponse response = sessionsClient.detectIntent(
+          buildDetectIntentRequest(session, queryInput, queryParameters));
       return response.getQueryResult();
     }
   }
 
-  // function to get the response for an event from dialogflow
+  // function to trigger an event in dialogflow
   public QueryResult triggerEvent(final String event, final Struct parameters, final Struct payload)
       throws Exception {
     try (SessionsClient sessionsClient = SessionsClient.create()) {
@@ -77,11 +75,6 @@ public class DialogflowConversation {
       final QueryParameters queryParameters = QueryParameters.newBuilder()
           .setPayload(payload)
           .build();
-      final DetectIntentRequest detectIntentRequest = DetectIntentRequest.newBuilder()
-          .setSession(session.toString())
-          .setQueryInput(queryInput)
-          .setQueryParams(queryParameters)
-          .build();
       // before triggering an event, we would need to set the context to the input context of the
       // intent that we want to be matched
       ChatServiceConstants.EVENT_TO_CONTEXT_MAPPING.get(event)
@@ -92,13 +85,14 @@ public class DialogflowConversation {
               logger.error("Error while setting contexts for session", e);
             }
           });
-      final DetectIntentResponse response = sessionsClient.detectIntent(detectIntentRequest);
+      final DetectIntentResponse response = sessionsClient.detectIntent(
+          buildDetectIntentRequest(session, queryInput, queryParameters));
       return response.getQueryResult();
     }
   }
 
-  // activate given context for the session
-  void setContextForSession(final String ContextName) throws IOException {
+  // function activate given context for the session
+  private void setContextForSession(final String ContextName) throws IOException {
     try (ContextsClient contextsClient = ContextsClient.create()) {
       final SessionName parent = SessionName.of(projectID, sessionID);
       final Context context = Context
@@ -113,7 +107,7 @@ public class DialogflowConversation {
     }
   }
 
-  // get the current active contexts for the session
+  // function to get the current active contexts for the session
   public List<String> getCurrentContexts() throws Exception {
     final List<String> contextList = new ArrayList<String>();
     try (ContextsClient contextsClient = ContextsClient.create()) {
@@ -125,5 +119,15 @@ public class DialogflowConversation {
       }
     }
     return contextList;
+  }
+
+  // function to build the detect intent request
+  private DetectIntentRequest buildDetectIntentRequest(SessionName session, QueryInput queryInput,
+      QueryParameters queryParameters) {
+    return DetectIntentRequest.newBuilder()
+        .setSession(session.toString())
+        .setQueryInput(queryInput)
+        .setQueryParams(queryParameters)
+        .build();
   }
 }

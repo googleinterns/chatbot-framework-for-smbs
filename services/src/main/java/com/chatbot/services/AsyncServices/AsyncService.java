@@ -5,17 +5,18 @@ import java.io.IOException;
 import com.chatbot.services.protobuf.ChatServiceRequestOuterClass.ChatServiceRequest;
 import com.chatbot.services.protobuf.TriggerEventNotificationOuterClass.TriggerEventNotification;
 
+// Class to asynchronously handle responding to messages from users and pubsub
+
 abstract class AsyncService {
 
-  protected static final String IMAGES_RECEIVED_MESSAGE = "The images have been received!";
-  protected static final String THANKS_FOR_ADDING_MESSAGE = "Thank You for Adding me";
-  protected static final String NOT_EXPECTING_IMAGE_MESSAGE =
-      "Sorry, we were not expecting any attachements from you.";
-
+  // method to handle a user message
   abstract void chatServiceRequestHandler(final ChatServiceRequest chatServiceRequest) throws Exception;
+  // method to send messages to a user using their userID 
   abstract void sendMessageUsingUserID(final String userID, final String message, final boolean isCard) throws IOException; 
+  // method to send messages to a user using the ID generated for them by the chat client being used
   abstract void sendMessageUsingChatClientGeneratedID(final String chatClientGeneratedID,
       final String message, final boolean isCard) throws IOException;
+  // method to handle an event trigger for a user
   abstract void triggerEventHandler(final TriggerEventNotification triggerEventNotification)
       throws Exception;
 

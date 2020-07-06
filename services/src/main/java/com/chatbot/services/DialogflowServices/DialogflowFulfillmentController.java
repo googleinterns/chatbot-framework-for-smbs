@@ -10,7 +10,6 @@ import com.chatbot.services.AsyncServices.HangoutsAsyncService;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -19,10 +18,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class DialogflowFulfillmentController {
 
-  @Autowired
   private HangoutsAsyncService asyncService;
 
   private static Map<String, String> parameterMap = new HashMap<>();
+
+  public DialogflowFulfillmentController(HangoutsAsyncService asyncServiceToSet) {
+    asyncService = asyncServiceToSet;
+  }
 
   @PostMapping("/dgf")
   String onEvent(@RequestHeader final Map<String, String> headers,

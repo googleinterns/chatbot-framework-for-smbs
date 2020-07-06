@@ -13,7 +13,11 @@ import java.util.Map;
   public static final List<String> LIST_OF_INTENTS_WITH_INTERACTIVE_RESPONSE = new ArrayList<>(
       Arrays.asList("Default Welcome Intent", "Default Fallback Intent", "NotGettingEnoughCalls", 
       "ProbeIrrelevantCall", "GettingCallsFromOutsideServiceArea", "SuggestImageUpload",
-      "GetCallFeedback", "ProbeReason", "ShouldRecommendOtherOptions", "SuggestCategoryChange"));    
+      "GetCallFeedback", "ProbeReason", "ShouldRecommendOtherOptions", "SuggestCategoryChange"));
+  public static final String IMAGES_RECEIVED_MESSAGE = "The images have been received!";
+  public static final String THANKS_FOR_ADDING_MESSAGE = "Thank You for Adding me";
+  public static final String NOT_EXPECTING_IMAGE_MESSAGE =
+          "Sorry, we were not expecting any attachements from you.";    
   public static final String SUGGEST_SERVICE_TIME_CHANGE = "SuggestServiceTimeChange";
   public static final String CHANGE_SERVICE_TIME = "ChangeServiceTime";
   public static final String PROVIDE_TARGETED_QUERIES_INTENT_NAME = "ProvideTargetedQueries";

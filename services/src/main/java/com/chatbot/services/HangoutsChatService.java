@@ -21,10 +21,10 @@ public class HangoutsChatService {
   HangoutsChatService(@Value("${hangoutsAPIScope}") final String apiScope,
       @Value("${credentialsFile}") final String credentialsFile) throws GeneralSecurityException,
       IOException {
-    GoogleCredentials credentials = GoogleCredentials.fromStream(
+    final GoogleCredentials credentials = GoogleCredentials.fromStream(
         HangoutsChatService.class.getResourceAsStream(credentialsFile))
         .createScoped(apiScope);
-    HttpRequestInitializer requestInitializer = new HttpCredentialsAdapter(credentials);
+    final HttpRequestInitializer requestInitializer = new HttpCredentialsAdapter(credentials);
     chatService = new HangoutsChat.Builder(
         GoogleNetHttpTransport.newTrustedTransport(),
         JacksonFactory.getDefaultInstance(), requestInitializer)
