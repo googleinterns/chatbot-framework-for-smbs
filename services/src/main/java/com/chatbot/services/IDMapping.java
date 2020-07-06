@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
 import com.google.api.services.chat.v1.HangoutsChat;
 import com.google.api.services.chat.v1.model.Membership;
 import com.google.api.services.chat.v1.model.Space;
@@ -22,6 +24,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class IDMapping {
 
+  @Autowired
+  HangoutsChatService hangoutsChatService;
+
   private static Map<ChatClient, BiMap<String, String>> ChatClientToChatClientBiMapMapping;
   public static final int SPACEID_PREFIX_LENGTH = 7;
   public static final int USERID_PREFIX_LENGTH = 6;
@@ -31,18 +36,12 @@ public class IDMapping {
     ChatClientToChatClientBiMapMapping = new HashMap<ChatClient, BiMap<String, String>>();
     ChatClientToChatClientBiMapMapping.put(ChatClient.WHATSAPP, HashBiMap.create());
     ChatClientToChatClientBiMapMapping.put(ChatClient.HANGOUTS, HashBiMap.create());
-    populateHangoutsBiMap();
-  }
-
-  public IDMapping(final String chatClientGeneratedID, final String userID) {
-    ChatClientToChatClientBiMapMapping = new HashMap<ChatClient, BiMap<String, String>>();
-    ChatClientToChatClientBiMapMapping.put(ChatClient.HANGOUTS, HashBiMap.create());
-    addNewMapping(chatClientGeneratedID, userID, ChatClient.HANGOUTS);
   }
 
   // populate the IDs of Hangouts users
+  @PostConstruct
   private void populateHangoutsBiMap() throws GeneralSecurityException, IOException {
-    final HangoutsChat chatService = HangoutsChatService.chatService;
+    final HangoutsChat chatService = hangoutsChatService.getChatService();
     final List<Space> spacesList = chatService.spaces().list().execute().getSpaces();
     for (final Space space : spacesList) {
       final String spaceName = space.getName();

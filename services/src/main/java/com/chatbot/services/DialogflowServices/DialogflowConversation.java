@@ -16,6 +16,9 @@ import com.google.protobuf.Struct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 
 import com.google.cloud.dialogflow.v2.EventInput;
 
@@ -23,22 +26,25 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class DialogflowConversation {
 
   private static final Logger logger = LoggerFactory.getLogger(DialogflowConversation.class);
   private static String projectID;
-  private final String langCode;
-  private final String sessionID;
+  private String langCode;
+  private String sessionID;
 
-  DialogflowConversation(final String projectIDToSet, final String langCodeToSet,
-      final String sessionIDToSet) {
-    projectID = projectIDToSet;
+  DialogflowConversation(@Value("${languageCode}") final String langCodeToSet) {
+    projectID = System.getenv("projectID");
     langCode = langCodeToSet;
-    sessionID = sessionIDToSet;
   }
 
-  public DialogflowConversation(final String projectIDToSet, final String sessionIDToSet) {
-    this(projectIDToSet, "en", sessionIDToSet);
+  public void setSessionID(final String sessionIDToSet) {
+    sessionID = sessionIDToSet;
+  }
+ 
+  public void setLanguageCode(final String langCodeToSet) {
+    langCode = langCodeToSet;
   }
 
   // function to get the response for a user message from dialogflow

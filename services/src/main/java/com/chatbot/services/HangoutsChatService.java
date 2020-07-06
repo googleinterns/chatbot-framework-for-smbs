@@ -16,19 +16,23 @@ import org.springframework.stereotype.Component;
 @Component
 public class HangoutsChatService {
   
-  public static HangoutsChat chatService;
+  private HangoutsChat chatService;
 
   HangoutsChatService(@Value("${hangoutsAPIScope}") final String apiScope,
       @Value("${credentialsFile}") final String credentialsFile) throws GeneralSecurityException,
       IOException {
-    final GoogleCredentials credentials = GoogleCredentials.fromStream(
+    GoogleCredentials credentials = GoogleCredentials.fromStream(
         HangoutsChatService.class.getResourceAsStream(credentialsFile))
         .createScoped(apiScope);
-    final HttpRequestInitializer requestInitializer = new HttpCredentialsAdapter(credentials);
+    HttpRequestInitializer requestInitializer = new HttpCredentialsAdapter(credentials);
     chatService = new HangoutsChat.Builder(
         GoogleNetHttpTransport.newTrustedTransport(),
         JacksonFactory.getDefaultInstance(), requestInitializer)
         .setApplicationName("chatbot").build();
   }
+
+  public HangoutsChat getChatService() {
+    return chatService;
+  } 
 
 }
