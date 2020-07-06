@@ -19,7 +19,6 @@ import com.google.api.services.chat.v1.model.WidgetMarkup;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 // This class handles the creation and sending of messages to Hangouts users
@@ -29,8 +28,11 @@ public class HangoutsMessageSender extends MessageSender {
 
   private static final Logger logger = LoggerFactory.getLogger(HangoutsMessageSender.class);
 
-  @Autowired
   HangoutsChatService hangoutsChatService;
+
+  public HangoutsMessageSender(final HangoutsChatService hangoutsChatServiceToSet) {
+    hangoutsChatService = hangoutsChatServiceToSet;
+  }
 
   public enum HANGOUTS_MESSAGE_TYPE {
     TEXT,
@@ -40,14 +42,14 @@ public class HangoutsMessageSender extends MessageSender {
 
   // send message to a user using their chatClientGeneratedID (spaceID for hangouts)
   @Override
-  public void sendMessage(final String chatClientGeneratedID, final String msg) throws IOException {
+  void sendMessage(final String chatClientGeneratedID, final String msg) throws IOException {
     if(msg.isEmpty()) {
       return;
     }
     sendMessage(chatClientGeneratedID, (new Message().setText(msg)));
   }
 
-  public void sendMessage(final String chatClientGeneratedID, final Message message)
+  private void sendMessage(final String chatClientGeneratedID, final Message message)
       throws IOException {
     hangoutsChatService.getChatService().spaces()
         .messages()
@@ -56,7 +58,7 @@ public class HangoutsMessageSender extends MessageSender {
   }
 
   // generate the list of messages to send based on the type of the message
-  public static List<Message> generateMessageListByType(final String msg,
+  private List<Message> generateMessageListByType(final String msg,
       final HANGOUTS_MESSAGE_TYPE messageType) {
     final List<Message> messageList = new ArrayList<>();
     switch (messageType) {
@@ -87,9 +89,8 @@ public class HangoutsMessageSender extends MessageSender {
       }
     });
   }
-
   // create an interactive card message with given list as options
-  public static Message generateCardMessage(final List<String> options) {
+  private Message generateCardMessage(final List<String> options) {
     final List<Section> sectionList = new ArrayList<>();
     for (final String option : options) {
       final List<WidgetMarkup> widgets = new ArrayList<>();
@@ -113,4 +114,5 @@ public class HangoutsMessageSender extends MessageSender {
         (new Card()).setSections(Collections.unmodifiableList(sectionList));
     return (new Message().setCards(Collections.singletonList(card)));
   }
+
 }

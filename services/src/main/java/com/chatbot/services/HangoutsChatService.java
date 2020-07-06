@@ -34,5 +34,4 @@ public class HangoutsChatService {
   public HangoutsChat getChatService() {
     return chatService;
   } 
-
 }
