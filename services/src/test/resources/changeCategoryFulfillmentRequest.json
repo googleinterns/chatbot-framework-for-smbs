@@ -1,0 +1,78 @@
+{
+    "responseId": "3645642",
+    "queryResult": {
+      "queryText": "Yes",
+      "parameters": {
+        "suggestedCategory": "cafe"
+      },
+      "allRequiredParamsPresent": true,
+      "fulfillmentMessages": [
+        {
+          "text": {
+            "text": [
+              ""
+            ]
+          }
+        }
+      ],
+      "outputContexts": [
+        {
+          "name": "projects/projectID/agent/sessions/123456/contexts/probereasoncontext",
+          "parameters": {
+            "suggestedCategory": "cafe",
+            "suggestedCategory.original": "",
+            "currentCategory": "",
+            "currentCategory.original": ""
+          }
+        },
+        {
+          "name": "projects/projectID/agent/sessions/123456/contexts/liketoknowmorecontext",
+          "parameters": {
+            "suggestedCategory": "",
+            "suggestedCategory.original": "",
+            "currentCategory": "",
+            "currentCategory.original": ""
+          }
+        },
+        {
+          "name": "projects/projectID/agent/sessions/123456/contexts/defaultwelcomeintent-followup",
+          "parameters": {
+            "suggestedCategory": "",
+            "suggestedCategory.original": "",
+            "currentCategory": "",
+            "currentCategory.original": ""
+          }
+        },
+        {
+          "name": "projects/projectID/agent/sessions/123456/contexts/changecategorycontext",
+          "parameters": {
+            "suggestedCategory": "",
+            "suggestedCategory.original": "",
+            "currentCategory": "",
+            "currentCategory.original": ""
+          }
+        },
+        {
+          "name": "projects/projectID/agent/sessions/123456/contexts/__system_counters__",
+          "parameters": {
+            "no-input": 0,
+            "no-match": 0,
+            "suggestedCategory": "",
+            "suggestedCategory.original": ""
+          }
+        }
+      ],
+      "intent": {
+        "name": "projects/projectID/agent/intents/123456",
+        "displayName": "ChangeCategory"
+      },
+      "intentDetectionConfidence": 1,
+      "languageCode": "en"
+    },
+    "originalDetectIntentRequest": {
+      "payload": {
+        "userID": "123456"
+      }
+    },
+    "session": "projects/projectID/agent/sessions/123456"
+  }

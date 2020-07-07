@@ -1,0 +1,69 @@
+{
+    "responseId": "564648761",
+    "queryResult": {
+      "queryText": "Change target radius to 10Km",
+      "parameters": {
+        "radius": {
+          "amount": 10,
+          "unit": "km"
+        }
+      },
+      "allRequiredParamsPresent": true,
+      "fulfillmentMessages": [
+        {
+          "text": {
+            "text": [
+              ""
+            ]
+          }
+        }
+      ],
+      "outputContexts": [
+        {
+          "name": "projects/projectID/agent/sessions/123456/contexts/noopcontext",
+          "lifespanCount": 1,
+          "parameters": {
+            "radius": {
+              "amount": 10,
+              "unit": "km"
+            },
+            "radius.original": "10Km"
+          }
+        },
+        {
+          "name": "projects/projectID/agent/sessions/123456/contexts/changetargetareacontext",
+          "parameters": {
+            "radius": {
+              "amount": 10,
+              "unit": "km"
+            },
+            "radius.original": "10Km"
+          }
+        },
+        {
+          "name": "projects/projectID/agent/sessions/123456/contexts/__system_counters__",
+          "parameters": {
+            "no-input": 0,
+            "no-match": 0,
+            "radius": {
+              "amount": 10,
+              "unit": "km"
+            },
+            "radius.original": "10Km"
+          }
+        }
+      ],
+      "intent": {
+        "name": "projects/123456/agent/intents/123456",
+        "displayName": "ChangeTargetArea"
+      },
+      "intentDetectionConfidence": 0.680601,
+      "languageCode": "en"
+    },
+    "originalDetectIntentRequest": {
+      "payload": {
+        "userID": "123456"
+      }
+    },
+    "session": "projects/projectID/agent/sessions/123456"
+  }
