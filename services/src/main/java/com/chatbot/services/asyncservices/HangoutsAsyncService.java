@@ -19,7 +19,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 // Handles sending of messages to hangouts chat
-
 @Component
 public class HangoutsAsyncService extends AsyncService {
 

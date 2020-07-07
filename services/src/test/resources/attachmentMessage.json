@@ -1,0 +1,54 @@
+{
+    "type": "MESSAGE",
+    "eventTime": "2020-06-30T18:27:48.269668Z",
+    "message": {
+      "name": "spaces/123456/messages/",
+      "sender": {
+        "name": "users/78910",
+        "displayName": "Sagar Jain",
+        "email": "john@foo.com",
+        "type": "HUMAN",
+        "domainId": "123456"
+      },
+      "createTime": "2020-06-30T18:27:48.269668Z",
+      "thread": {
+        "name": "spaces/123456/threads/",
+        "retentionSettings": {
+          "state": "EPHEMERAL_ONE_DAY",
+          "expiryTimestamp": "1593628068149291"
+        }
+      },
+      "space": {
+        "name": "spaces/123456",
+        "type": "DM",
+        "singleUserBotDm": true
+      },
+      "attachment": [
+        {
+          "name": "spaces/123456/messages/",
+          "contentName": "pizza.jpg",
+          "contentType": "image/jpeg",
+          "downloadUri": "donwloadUri",
+          "messageMetadata": {
+            "name": "spaces/123456/messages/",
+            "sender": "78910",
+            "createTime": "2020-06-30T18:27:48.269668Z",
+            "updateTime": "2020-06-30T18:27:48.269668Z"
+          },
+          "source": "UPLOADED_CONTENT"
+        }
+      ]
+    },
+    "user": {
+      "name": "users/78910",
+      "displayName": "Foo",
+      "email": "john@foo.com",
+      "type": "HUMAN",
+      "domainId": "123456"
+    },
+    "space": {
+      "name": "spaces/123456",
+      "type": "DM",
+      "singleUserBotDm": true
+    }
+}

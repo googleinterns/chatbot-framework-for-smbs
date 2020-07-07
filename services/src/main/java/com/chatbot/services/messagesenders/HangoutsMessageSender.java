@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 // This class handles the creation and sending of messages to Hangouts users
-
 @Component
 public class HangoutsMessageSender extends MessageSender {
 

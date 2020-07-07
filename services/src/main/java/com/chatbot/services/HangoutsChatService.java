@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 // Class for initialising and providing a connection to the hangouts API
-
 @Component
 public class HangoutsChatService {
   

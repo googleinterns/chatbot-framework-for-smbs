@@ -1,0 +1,148 @@
+{
+    "type": "CARD_CLICKED",
+    "eventTime": "2020-06-30T19:27:22.494466Z",
+    "message": {
+      "name": "spaces/123456/messages/",
+      "sender": {
+        "name": "users/78910",
+        "displayName": "",
+        "type": "BOT"
+      },
+      "createTime": "2020-06-30T19:27:22.494466Z",
+      "cards": [
+        {
+          "sections": [
+            {
+              "widgets": [
+                {
+                  "buttons": [
+                    {
+                      "textButton": {
+                        "text": "Not receiving enough calls",
+                        "onClick": {
+                          "action": {
+                            "actionMethodName": "INTERACTIVE_TEXT_BUTTON_ACTION",
+                            "parameters": [
+                              {
+                                "key": "message",
+                                "value": "Not receiving enough calls"
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "widgets": [
+                {
+                  "buttons": [
+                    {
+                      "textButton": {
+                        "text": "Receiving calls from other categories",
+                        "onClick": {
+                          "action": {
+                            "actionMethodName": "INTERACTIVE_TEXT_BUTTON_ACTION",
+                            "parameters": [
+                              {
+                                "key": "message",
+                                "value": "Receiving calls from other categories"
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "widgets": [
+                {
+                  "buttons": [
+                    {
+                      "textButton": {
+                        "text": "Receiving calls outside service timing",
+                        "onClick": {
+                          "action": {
+                            "actionMethodName": "INTERACTIVE_TEXT_BUTTON_ACTION",
+                            "parameters": [
+                              {
+                                "key": "message",
+                                "value": "Receiving calls outside service timing"
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "widgets": [
+                {
+                  "buttons": [
+                    {
+                      "textButton": {
+                        "text": "Want to change Ads budget",
+                        "onClick": {
+                          "action": {
+                            "actionMethodName": "INTERACTIVE_TEXT_BUTTON_ACTION",
+                            "parameters": [
+                              {
+                                "key": "message",
+                                "value": "Want to change Ads budget"
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "thread": {
+        "name": "spaces/123456/threads/",
+        "retentionSettings": {
+          "state": "EPHEMERAL_ONE_DAY",
+          "expiryTimestamp": "1593631642422912"
+        }
+      },
+      "space": {
+        "name": "spaces/123456",
+        "type": "DM",
+        "singleUserBotDm": true
+      }
+    },
+    "user": {
+      "name": "users/78910",
+      "displayName": "Foo",
+      "email": "john@foo.com",
+      "type": "HUMAN",
+      "domainId": "123456"
+    },
+    "space": {
+      "name": "spaces/123456",
+      "type": "DM",
+      "singleUserBotDm": true
+    },
+    "action": {
+      "actionMethodName": "INTERACTIVE_TEXT_BUTTON_ACTION",
+      "parameters": [
+        {
+          "key": "message",
+          "value": "Receiving calls from other categories"
+        }
+      ]
+    }
+  }
