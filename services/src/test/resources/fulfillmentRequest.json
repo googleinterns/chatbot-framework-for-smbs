@@ -1,0 +1,64 @@
+{
+  "responseId": "",
+  "queryResult": {
+    "queryText": "It was a spam call",
+    "parameters": {
+      "mobileNumber": "1234567890"
+    },
+    "allRequiredParamsPresent": true,
+    "fulfillmentText": "Thank you for the information",
+    "fulfillmentMessages": [
+      {
+        "text": {
+          "text": [
+            "Thank you for the information"
+          ]
+        }
+      }
+    ],
+    "outputContexts": [
+      {
+        "name": "projects/projectid/agent/sessions/123456/contexts/callunrelatedtobusinesscategorycontext",
+        "parameters": {
+          "mobileNumber": "1234567890",
+          "mobileNumber.original": ""
+        }
+      },
+      {
+        "name": "projects/projectid/agent/sessions/123456/contexts/exitwiththankscontext",
+        "parameters": {
+          "mobileNumber": "1234567890",
+          "mobileNumber.original": ""
+        }
+      },
+      {
+        "name": "projects/projectid/agent/sessions/123456/contexts/callfromoutsideserviceareacontext",
+        "parameters": {
+          "mobileNumber": "1234567890",
+          "mobileNumber.original": ""
+        }
+      },
+      {
+        "name": "projects/projectid/agent/sessions/123456/contexts/__system_counters__",
+        "parameters": {
+          "no-input": 0,
+          "no-match": 0,
+          "mobileNumber": "1234567890",
+          "mobileNumber.original": ""
+        }
+      }
+    ],
+    "intent": {
+      "name": "projects/projectid/agent/intents/987654",
+      "displayName": "CallFromOutsideServiceArea"
+    },
+    "intentDetectionConfidence": 0.49704143,
+    "languageCode": "en"
+  },
+  "originalDetectIntentRequest": {
+    "payload": {
+      "userID": "123456"
+    }
+  },
+  "session": "projects/projectid/agent/sessions/123456"
+}

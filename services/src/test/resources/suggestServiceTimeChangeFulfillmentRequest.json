@@ -1,0 +1,32 @@
+{
+  "responseId": "3645642",
+  "queryResult": {
+    "queryText": "Yes",
+    "parameters": {
+      "suggestedCategory": "cafe"
+    },
+    "allRequiredParamsPresent": true,
+    "fulfillmentMessages": [
+    ],
+    "outputContexts": [
+      {
+        "name": "projects/projectID/agent/sessions/123456/contexts/noop",
+        "parameters": {
+          "suggestedCategory": "cafe"
+        }
+      }
+    ],
+    "intent": {
+      "name": "projects/projectID/agent/intents/123456",
+      "displayName": "SuggestServiceTimeChange"
+    },
+    "intentDetectionConfidence": 1,
+    "languageCode": "en"
+  },
+  "originalDetectIntentRequest": {
+    "payload": {
+      "userID": "123456"
+    }
+  },
+  "session": "projects/projectID/agent/sessions/123456"
+}
