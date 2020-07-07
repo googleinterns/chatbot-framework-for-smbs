@@ -1,4 +1,4 @@
-package com.chatbot.services.DialogflowServices;
+package com.chatbot.services.dialogflowservices;
 
 import com.chatbot.services.ChatServiceConstants;
 import com.google.cloud.dialogflow.v2.Context;
@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 // Utilities to simplify conversations for a dialogflow sessions
-
 @Component
 public class DialogflowConversation {
 
@@ -37,7 +36,7 @@ public class DialogflowConversation {
   private String sessionID;
 
   DialogflowConversation(@Value("${languageCode}") final String langCodeToSet) {
-    projectID = System.getenv("projectID");
+    projectID = System.getenv("projectid");
     langCode = langCodeToSet;
   }
 

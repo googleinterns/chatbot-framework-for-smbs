@@ -7,23 +7,27 @@ import java.security.GeneralSecurityException;
 
 import com.chatbot.services.protobuf.ChatServiceRequestOuterClass.ChatServiceRequest.ChatClient;
 
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
+// tests for {@link com.chatbot.services.IDMapping}
 @RunWith(MockitoJUnitRunner.class)
 public class IDMappingTests {
 
+  @InjectMocks
   static IDMapping iDMapping;
 
   @Mock
   static HangoutsChatService hangoutsChatService;
 
-  @BeforeClass
-  public static void setUp() throws GeneralSecurityException, IOException {
-    iDMapping = new IDMapping(hangoutsChatService);
+  @Before
+  public void setUp() throws GeneralSecurityException, IOException {
+    MockitoAnnotations.initMocks(this);
     iDMapping.addNewMapping("chatClientID1", "userID1", ChatClient.HANGOUTS);
   }
 

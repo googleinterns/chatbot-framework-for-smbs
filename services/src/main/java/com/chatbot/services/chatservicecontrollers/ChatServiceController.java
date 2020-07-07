@@ -1,4 +1,4 @@
-package com.chatbot.services.ChatServiceControllers;
+package com.chatbot.services.chatservicecontrollers;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
 // Receive messages from chat clients and dispatch response calls
-
 abstract class ChatServiceController {
   // handle a request from the chat client
   abstract Message onRequest(@RequestHeader final Map<String, String> headers,
       @RequestBody final JsonNode event) throws IOException, GeneralSecurityException, Exception;
-  // build the ChatServiceRequest protobuf from the HTTP request at the chat servcie endpoint
+
+  // build the ChatServiceRequest protobuf from the HTTP request at the chat service endpoint
   abstract ChatServiceRequest buildChatServiceRequestFromHTTPRequest(final JsonNode event)
       throws Exception;
 }

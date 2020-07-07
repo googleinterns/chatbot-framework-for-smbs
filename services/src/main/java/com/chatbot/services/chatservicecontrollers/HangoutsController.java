@@ -1,4 +1,4 @@
-package com.chatbot.services.ChatServiceControllers;
+package com.chatbot.services.chatservicecontrollers;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,12 +21,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.chatbot.services.ChatServiceConstants;
 import com.chatbot.services.IDMapping;
-import com.chatbot.services.AsyncServices.HangoutsAsyncService;
+import com.chatbot.services.asyncservices.HangoutsAsyncService;
 import com.chatbot.services.protobuf.ChatServiceRequestOuterClass.ChatServiceRequest;
 import com.chatbot.services.protobuf.ChatServiceRequestOuterClass.ChatServiceRequest.ChatClient;
 import com.chatbot.services.protobuf.ChatServiceRequestOuterClass.ChatServiceRequest.MimeType;
 import com.chatbot.services.protobuf.ChatServiceRequestOuterClass.ChatServiceRequest.RequestType;
 
+// Receive messages from hangouts and dispatch response calls
 @RestController
 public class HangoutsController extends ChatServiceController {
 
@@ -37,8 +38,6 @@ public class HangoutsController extends ChatServiceController {
   private static final String ADDED_TO_SPACE_EVENT = "ADDED_TO_SPACE";
   private static final String MESSAGE_EVENT = "MESSAGE";
   private static final String CARD_CLICKED_EVENT = "CARD_CLICKED";
-
-  // Receive messages from hangouts and dispatch response calls
 
   public HangoutsController(HangoutsAsyncService asyncServiceToSet,
       HangoutsAuth hangoutsAuthToSet) {
@@ -63,14 +62,9 @@ public class HangoutsController extends ChatServiceController {
     } else {
       // replace the button with a text paragraph to render it unclickable
       reply.setActionResponse((new ActionResponse()).set("type", "UPDATE_MESSAGE"));
-      final List<WidgetMarkup> widgets = new ArrayList<>();
-      final TextParagraph widget =
-          new TextParagraph().setText(event.at("/action/parameters/0/value").asText());
-      widgets.add(new WidgetMarkup().setTextParagraph(widget));
-      final Section section = new Section()
-          .setWidgets(widgets);
+      // the selected option will be present as the first element in parameters field
       reply.setCards(Collections
-          .singletonList((new Card()).setSections(Collections.singletonList(section))));
+          .singletonList(buildTextParagraphCard(event.at("/action/parameters/0/value").asText())));
     }
     return reply;
   }
@@ -174,6 +168,13 @@ public class HangoutsController extends ChatServiceController {
         .substring(IDMapping.USERID_PREFIX_LENGTH));
     chatServiceRequestBuilder.setSender(senderBuilder); 
     return chatServiceRequestBuilder;
+  }
+  
+  private Card buildTextParagraphCard(final String text) {
+    final List<WidgetMarkup> widgets = new ArrayList<>();
+    widgets.add(new WidgetMarkup().setTextParagraph(new TextParagraph().setText(text)));
+    final Section section = new Section().setWidgets(widgets);
+    return new Card().setSections(Collections.singletonList(section));
   }
 
 }

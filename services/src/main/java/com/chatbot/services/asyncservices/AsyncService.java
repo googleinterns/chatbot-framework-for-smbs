@@ -1,4 +1,4 @@
-package com.chatbot.services.AsyncServices;
+package com.chatbot.services.asyncservices;
 
 import java.io.IOException;
 
@@ -6,7 +6,6 @@ import com.chatbot.services.protobuf.ChatServiceRequestOuterClass.ChatServiceReq
 import com.chatbot.services.protobuf.TriggerEventNotificationOuterClass.TriggerEventNotification;
 
 // Class to asynchronously handle responding to messages from users and pubsub
-
 abstract class AsyncService {
 
   // method to handle a user message

@@ -1,4 +1,4 @@
-package com.chatbot.services.MessageSenders;
+package com.chatbot.services.messagesenders;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 // This class handles the creation and sending of messages to Hangouts users
-
 @Component
 public class HangoutsMessageSender extends MessageSender {
 

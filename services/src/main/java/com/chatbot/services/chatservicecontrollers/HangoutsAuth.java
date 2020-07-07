@@ -1,4 +1,4 @@
-package com.chatbot.services.ChatServiceControllers;
+package com.chatbot.services.chatservicecontrollers;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -16,14 +16,13 @@ import org.springframework.stereotype.Component;
 import com.chatbot.services.ChatServiceConstants;
 
 // Authenticate requests at the chat service endpoint
-
 @Component
 public class HangoutsAuth {
 
   // verify the request using header params
   public void verifyRequest(Map<String, String> headers)
     throws IOException, GeneralSecurityException {
-    final String AUDIENCE = System.getenv("projectNumber");
+    final String audience = System.getenv("projectnumber");
     // authorization header format: `authorization <token>`
     final String BEARER_TOKEN = headers.get("authorization").split(" ")[1];
     final JacksonFactory factory = new JacksonFactory();
@@ -40,7 +39,7 @@ public class HangoutsAuth {
     if (idToken == null) {
       throw new IllegalArgumentException("Token cannot be parsed");
     }
-    if (!verifier.verify(idToken) || !idToken.verifyAudience(Collections.singletonList(AUDIENCE))
+    if (!verifier.verify(idToken) || !idToken.verifyAudience(Collections.singletonList(audience))
         || !idToken.verifyIssuer(ChatServiceConstants.CHAT_ISSUER)) {
       throw new IllegalArgumentException("Invalid token");
     }

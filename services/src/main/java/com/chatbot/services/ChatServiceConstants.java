@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 // Collection of constants used in the package
-
 public class ChatServiceConstants {
   public static final Map<String, List<String>> EVENT_TO_CONTEXT_MAPPING = Map.of(
       "SUGGEST_CATEGORY_CHANGE", Arrays.asList("SuggestChangeCatgeoryContext"),
