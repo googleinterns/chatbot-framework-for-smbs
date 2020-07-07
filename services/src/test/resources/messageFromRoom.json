@@ -1,0 +1,45 @@
+{
+  "type": "MESSAGE",
+  "eventTime": "2020-06-30T18:16:11.269564Z",
+  "token": "",
+  "message": {
+    "name": "spaces/123456/messages/",
+    "sender": {
+      "name": "users/78910",
+      "displayName": "Foo",
+      "avatarUrl": "",
+      "email": "john@foo.com",
+      "type": "HUMAN",
+      "domainId": "12345"
+    },
+    "createTime": "2020-06-30T18:16:11.269564Z",
+    "text": "Hello",
+    "thread": {
+      "name": "spaces/123456/threads/AbccV4kauoI",
+      "retentionSettings": {
+        "state": "EPHEMERAL_ONE_DAY",
+        "expiryTimestamp": "1593627371128868"
+      }
+    },
+    "space": {
+      "name": "spaces/123456",
+      "type": "ROOM",
+      "singleUserBotDm": true
+    },
+    "argumentText": "Hello"
+  },
+  "user": {
+    "name": "users/78910",
+    "displayName": "Foo",
+    "avatarUrl": "",
+    "email": "john@foo.com",
+    "type": "HUMAN",
+    "domainId": "12345"
+  },
+  "space": {
+    "name": "spaces/123456",
+    "type": "ROOM",
+    "singleUserBotDm": true
+  },
+  "configCompleteRedirectUrl": ""
+}
