@@ -8,10 +8,10 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import com.chatbot.services.AsyncServices.HangoutsAsyncService;
-import com.chatbot.services.DialogflowServices.DialogflowConversation;
-import com.chatbot.services.MessageSenders.HangoutsMessageSender;
-import com.chatbot.services.MessageSenders.HangoutsMessageSender.HANGOUTS_MESSAGE_TYPE;
+import com.chatbot.services.asyncservices.HangoutsAsyncService;
+import com.chatbot.services.dialogflowservices.DialogflowConversation;
+import com.chatbot.services.messagesenders.HangoutsMessageSender;
+import com.chatbot.services.messagesenders.HangoutsMessageSender.HANGOUTS_MESSAGE_TYPE;
 import com.chatbot.services.protobuf.ChatServiceRequestOuterClass.ChatServiceRequest;
 import com.chatbot.services.protobuf.ChatServiceRequestOuterClass.ChatServiceRequest.Attachment;
 import com.chatbot.services.protobuf.ChatServiceRequestOuterClass.ChatServiceRequest.ChatClient;
@@ -34,6 +34,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
+// tests for {@link com.chatbot.services.asyncservices.HangoutsAsyncService}
 @RunWith(MockitoJUnitRunner.class)
 public class AsyncServiceTests {
   

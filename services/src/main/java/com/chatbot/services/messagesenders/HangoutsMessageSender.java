@@ -1,4 +1,4 @@
-package com.chatbot.services.MessageSenders;
+package com.chatbot.services.messagesenders;
 
 import java.io.IOException;
 import java.util.ArrayList;

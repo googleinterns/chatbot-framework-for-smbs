@@ -1,4 +1,4 @@
-package com.chatbot.services.AsyncServices;
+package com.chatbot.services.asyncservices;
 
 import java.util.concurrent.Executor;
 

@@ -1,4 +1,4 @@
-package com.chatbot.services.DialogflowServices;
+package com.chatbot.services.dialogflowservices;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import com.chatbot.services.ChatServiceConstants;
-import com.chatbot.services.AsyncServices.HangoutsAsyncService;
+import com.chatbot.services.asyncservices.HangoutsAsyncService;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -30,7 +30,7 @@ public class DialogflowFulfillmentController {
   String onEvent(@RequestHeader final Map<String, String> headers,
       @RequestBody final JsonNode event) throws JsonParseException, IOException,
       IllegalArgumentException {
-    if(!headers.get("authorization").equals(System.getenv("dialogflowAuthToken"))) {
+    if(!headers.get("authorization").equals(System.getenv("dialogflowauthtoken"))) {
       throw new IllegalArgumentException("Invalid auth token in request");
     }
     final String intentName = event.at("/queryResult/intent/displayName").asText();
@@ -86,13 +86,13 @@ public class DialogflowFulfillmentController {
         asyncService.sendMessageUsingUserID(userID, buildServiceTimingSuggestionMessage(),
             true);
         break;
-        case ChatServiceConstants.CHANGE_SERVICE_TIME:
-          // TODO: change service time to parameters.get("startTime.original") to
-          // parameters.get("endTime.original") for the user
-          asyncService.sendMessageUsingUserID(userID, buildServiceTimingChangedMessage(
-              parameters.get("startTime.original").get(0).asText(),
-              parameters.get("endTime.original").get(0).asText()),
-              false);
+      case ChatServiceConstants.CHANGE_SERVICE_TIME:
+        // TODO: change service time to parameters.get("startTime.original") to
+        // parameters.get("endTime.original") for the user
+        asyncService.sendMessageUsingUserID(userID, buildServiceTimingChangedMessage(
+            parameters.get("startTime.original").get(0).asText(),
+            parameters.get("endTime.original").get(0).asText()),
+            false);
         break;
       default:
         break;
@@ -111,11 +111,11 @@ public class DialogflowFulfillmentController {
   }
 
   private static String buildTargetedQueriesMessage(final String suggestedCategory) {
-    return "These are some targeted queries for" + suggestedCategory;
+    return "These are some targeted queries for " + suggestedCategory;
   }
 
   private static String buildExplainMeaningMessage(final String suggestedCategory) {
-    return "This is some information about the" +  suggestedCategory;
+    return "This is some information about the " +  suggestedCategory;
   }
 
   private static String buildTargetAreaSuggestionMessage() {
