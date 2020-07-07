@@ -1,0 +1,16 @@
+{
+  "message": {
+    "attributes": {
+      "chatClient": "HANGOUTS",
+      "event": "GET_CALL_FEEDBACK",
+      "mobileNumber": "+91 987456321",
+      "userID": "123456"
+    },
+    "data": "VHJpZ2dlckV2ZW50",
+    "messageId": "123456",
+    "message_id": "123456",
+    "publishTime": "2020-07-02T05:18:25.562Z",
+    "publish_time": "2020-07-02T05:18:25.562Z"
+  },
+  "subscription": "projects/projectID/subscriptions/test-sub-push"
+}
