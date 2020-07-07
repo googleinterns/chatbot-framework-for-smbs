@@ -1,4 +1,4 @@
-package com.chatbot.services.DialogflowServices;
+package com.chatbot.services.dialogflowservices;
 
 import com.chatbot.services.ChatServiceConstants;
 import com.google.cloud.dialogflow.v2.Context;
@@ -37,7 +37,7 @@ public class DialogflowConversation {
   private String sessionID;
 
   DialogflowConversation(@Value("${languageCode}") final String langCodeToSet) {
-    projectID = System.getenv("projectID");
+    projectID = System.getenv("projectid");
     langCode = langCodeToSet;
   }
 

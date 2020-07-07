@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.chatbot.services.MessageSenders.HangoutsMessageSender;
-import com.chatbot.services.MessageSenders.HangoutsMessageSender.HANGOUTS_MESSAGE_TYPE;
+import com.chatbot.services.messagesenders.HangoutsMessageSender;
+import com.chatbot.services.messagesenders.HangoutsMessageSender.HANGOUTS_MESSAGE_TYPE;
 import com.google.api.services.chat.v1.HangoutsChat;
 import com.google.api.services.chat.v1.HangoutsChat.Spaces;
 import com.google.api.services.chat.v1.HangoutsChat.Spaces.Messages;
@@ -29,15 +29,19 @@ import com.google.api.services.chat.v1.model.WidgetMarkup;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
+// tests for {@link com.chatbot.services.messagesenders.HangoutsMessageSender}
 @RunWith(MockitoJUnitRunner.class)
 public class HangoutsMessageSenderTests {
 
+  @InjectMocks
   private HangoutsMessageSender hangoutsMessageSender;
   @Mock
-  private static HangoutsChatService mockHangoutsChatService;
+  private HangoutsChatService mockHangoutsChatService;
   @Mock
   HangoutsChat mockHangoutsChat;
   @Mock
@@ -51,7 +55,7 @@ public class HangoutsMessageSenderTests {
 
   @Before
   public void setUp() throws IOException {
-    hangoutsMessageSender = new HangoutsMessageSender(mockHangoutsChatService);
+    MockitoAnnotations.initMocks(this);
     when(mockHangoutsChatService.getChatService()).thenReturn(mockHangoutsChat);
     when(mockHangoutsChat.spaces()).thenReturn(mockSpaces);
     when(mockSpaces.messages()).thenReturn(mockMessages);

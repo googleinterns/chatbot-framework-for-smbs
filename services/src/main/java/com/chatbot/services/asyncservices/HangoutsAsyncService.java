@@ -1,13 +1,13 @@
-package com.chatbot.services.AsyncServices;
+package com.chatbot.services.asyncservices;
 
 import java.io.IOException;
 import java.util.List;
 
 import com.chatbot.services.ChatServiceConstants;
 import com.chatbot.services.IDMapping;
-import com.chatbot.services.DialogflowServices.DialogflowConversation;
-import com.chatbot.services.MessageSenders.HangoutsMessageSender;
-import com.chatbot.services.MessageSenders.HangoutsMessageSender.HANGOUTS_MESSAGE_TYPE;
+import com.chatbot.services.dialogflowservices.DialogflowConversation;
+import com.chatbot.services.messagesenders.HangoutsMessageSender;
+import com.chatbot.services.messagesenders.HangoutsMessageSender.HANGOUTS_MESSAGE_TYPE;
 import com.chatbot.services.protobuf.ChatServiceRequestOuterClass.ChatServiceRequest;
 import com.chatbot.services.protobuf.ChatServiceRequestOuterClass.ChatServiceRequest.ChatClient;
 import com.chatbot.services.protobuf.TriggerEventNotificationOuterClass.TriggerEventNotification;
