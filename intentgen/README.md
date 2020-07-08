@@ -11,7 +11,7 @@
 - Add the service account key to `intentgen/src/main/resources/service-acct.json`
 - Set the projectID environment
 
-        export projectID=<projectID>
+        export projectid=<projectID>
 - Add the protxt file describing the usecase to `intentgen/src/main/resources`
 - Generate the intents
 
