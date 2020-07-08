@@ -18,13 +18,13 @@
 - Add the service account key to `services/src/main/resources/service-acct.json`
 - Set environment variables
         
-        export projectID=<projectID>
+        export projectid=<projectID>
         export GOOGLE_APPLICATION_CREDENTIALS=<path-to-credentials-file>
-        export projectNumber=<projectNumber>
-        export subscriptionID=<pubsub-subscriberID>
-        export topicID=<pubsub-topic>
-        export pubsubAudience=<subscription-audience>
-        export dialogflowAuthToken=<dialogflowAuthToken>
+        export projectnumber=<projectNumber>
+        export subscriptionid=<pubsub-subscriberID>
+        export topicid=<pubsub-topic>
+        export pubsubaudience=<subscription-audience>
+        export dialogflowauthtoken=<dialogflowAuthToken>
 
 - Start the chat service
 
