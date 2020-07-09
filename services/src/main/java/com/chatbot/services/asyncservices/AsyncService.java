@@ -9,7 +9,7 @@ import com.chatbot.services.protobuf.TriggerEventNotificationOuterClass.TriggerE
 abstract class AsyncService {
 
   // method to handle a user message
-  abstract void chatServiceRequestHandler(final ChatServiceRequest chatServiceRequest) throws Exception;
+  abstract void chatServiceRequestHandler(final ChatServiceRequest chatServiceRequest) throws IOException;
   // method to send messages to a user using their userID 
   abstract void sendMessageUsingUserID(final String userID, final String message, final boolean isCard) throws IOException; 
   // method to send messages to a user using the ID generated for them by the chat client being used
@@ -17,6 +17,6 @@ abstract class AsyncService {
       final String message, final boolean isCard) throws IOException;
   // method to handle an event trigger for a user
   abstract void triggerEventHandler(final TriggerEventNotification triggerEventNotification)
-      throws Exception;
+      throws IOException;
 
 }
