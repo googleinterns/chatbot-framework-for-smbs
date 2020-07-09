@@ -13,7 +13,6 @@ import com.chatbot.services.protobuf.TriggerEventNotificationOuterClass.TriggerE
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.protobuf.Struct;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -23,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class PubSubController {
 
+  // TODO: make these variables final
   private HangoutsAsyncService asyncService;
   private PubSubAuth pubSubAuth;
 
@@ -66,7 +66,7 @@ public class PubSubController {
         case "WHATSAPP":
           triggerEventNotificationBuilder.setChatClient(ChatClient.WHATSAPP);
           throw new IllegalArgumentException(buildChatClientErrorMessage("Whatsapp"));
-          default:
+        default:
           throw new IllegalArgumentException(buildChatClientErrorMessage(chatClient)); 
       }
     } else {

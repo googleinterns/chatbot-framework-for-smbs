@@ -57,21 +57,22 @@ public class PubSubPullSubscriber {
         .of(projectID, subscriptionID);
     final MessageReceiver receiver =
         (final PubsubMessage message, final AckReplyConsumer consumer) -> {
-      final String messageData = message.getData().toStringUtf8();
-      final Map<String, String> messageAttributesMap = message.getAttributesMap();
-      if(messageData.equals(ChatServiceConstants.TRIGGER_EVENT_MESSAGE)) {
-        final TriggerEventNotification triggerEventNotification = 
-            buildNotificationFromMessage(messageAttributesMap);
-        try {
-          asyncService.triggerEventHandler(triggerEventNotification);
-        } catch (final IOException e) {
-          logger.error("Error while handling event trigger", e);
+          final String messageData = message.getData().toStringUtf8();
+          final Map<String, String> messageAttributesMap = message.getAttributesMap();
+          if (messageData.equals(ChatServiceConstants.TRIGGER_EVENT_MESSAGE)) {
+            final TriggerEventNotification triggerEventNotification = 
+                buildNotificationFromMessage(messageAttributesMap);
+            // TODO: remove try-catch
+            try {
+              asyncService.triggerEventHandler(triggerEventNotification);
+            } catch (final IOException e) {
+              logger.error("Error while handling event trigger", e);
+            }
+          } else {
+            throw new IllegalArgumentException("Unknown message received at subscriber");
+          }
+          consumer.ack();
         };
-      } else {
-        throw new IllegalArgumentException("Unknown message received at subscriber");
-      }
-      consumer.ack();
-    };
     final FlowControlSettings flowControlSettings = FlowControlSettings.newBuilder()
         .setMaxOutstandingElementCount(maxOutstandingElements)
         .setMaxOutstandingRequestBytes(maxOutstandingBytes)
@@ -91,12 +92,12 @@ public class PubSubPullSubscriber {
       final Map<String, String> messageAttributesMap) throws IllegalArgumentException {
     final TriggerEventNotification.Builder triggerEventNotificationBuilder = 
         TriggerEventNotification.newBuilder();
-    if(messageAttributesMap.containsKey("userID")) {
+    if (messageAttributesMap.containsKey("userID")) {
       triggerEventNotificationBuilder.setUserID(messageAttributesMap.get("userID"));
     } else {
       throw new IllegalArgumentException("No userID provided in published message");
     }
-    if(messageAttributesMap.containsKey("chatClient")) {
+    if (messageAttributesMap.containsKey("chatClient")) {
       switch (messageAttributesMap.get("chatClient")) {
         case "HANGOUTS":
           triggerEventNotificationBuilder.setChatClient(ChatClient.HANGOUTS);
@@ -110,7 +111,7 @@ public class PubSubPullSubscriber {
     } else {
       throw new IllegalArgumentException("No chat client provided in published message");
     } 
-    if(messageAttributesMap.containsKey("event")) {
+    if (messageAttributesMap.containsKey("event")) {
       switch (messageAttributesMap.get("event")) {
         case ChatServiceConstants.SUGGEST_CATEGORY_CHANGE_EVENT:
           final com.google.protobuf.Value suggestedCategory = com.google.protobuf.Value.newBuilder()

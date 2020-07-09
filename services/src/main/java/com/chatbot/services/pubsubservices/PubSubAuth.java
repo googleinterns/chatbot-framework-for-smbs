@@ -14,10 +14,11 @@ import org.springframework.stereotype.Component;
 // Authenticate requests at the pubsub endpoint
 @Component
 public class PubSubAuth {
+  // verify request
   public void verifyRequest(final Map<String, String> headers)
       throws GeneralSecurityException, IOException {
     final GoogleIdTokenVerifier verifier =
-    new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new JacksonFactory())
+        new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new JacksonFactory())
         .setAudience(Collections.singletonList(System.getenv("pubsubAudience"))).build();
     final String authorizationHeader = headers.get("authorization");
     // authorization header format: `authorization <token>`
@@ -25,7 +26,7 @@ public class PubSubAuth {
         || authorizationHeader.split(" ").length != 2) {
       throw new IllegalArgumentException("Bad Request");
     }
-    if(verifier.verify(authorizationHeader.split(" ")[1]) == null) {
+    if (verifier.verify(authorizationHeader.split(" ")[1]) == null) {
       throw new IllegalArgumentException("Invalid ID token in request");
     }
   }
