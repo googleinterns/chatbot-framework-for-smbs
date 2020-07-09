@@ -70,8 +70,7 @@ public class HangoutsController extends ChatServiceController {
   }
 
   // build the chatServiceRequest protobuf for a HTTP request from the chat client
-  ChatServiceRequest buildChatServiceRequestFromHTTPRequest(final JsonNode event)
-      throws Exception {
+  ChatServiceRequest buildChatServiceRequestFromHTTPRequest(final JsonNode event) {
     if ("ROOM".equals(event.at("/space/type").asText())) {
       throw new IllegalArgumentException("The message was received from a room");
     }

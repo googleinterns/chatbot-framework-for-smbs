@@ -49,7 +49,7 @@ public class DialogflowConversation {
   }
 
   // function to send the user message to dialogflow 
-  public QueryResult sendMessage(final String message, final Struct payload) throws Exception {
+  public QueryResult sendMessage(final String message, final Struct payload) throws IOException {
     try (SessionsClient sessionsClient = SessionsClient.create()) {
       final SessionName session = SessionName.of(projectID, sessionID);
       final TextInput.Builder textInput = TextInput.newBuilder().setText(message)
@@ -65,7 +65,7 @@ public class DialogflowConversation {
 
   // function to trigger an event in dialogflow
   public QueryResult triggerEvent(final String event, final Struct parameters, final Struct payload)
-      throws Exception {
+      throws IOException {
     try (SessionsClient sessionsClient = SessionsClient.create()) {
       final SessionName session = SessionName.of(projectID, sessionID);
       final EventInput.Builder eventInput = EventInput.newBuilder()
@@ -109,7 +109,7 @@ public class DialogflowConversation {
   }
 
   // function to get the current active contexts for the session
-  public List<String> getCurrentContexts() throws Exception {
+  public List<String> getCurrentContexts() throws IOException {
     final List<String> contextList = new ArrayList<String>();
     try (ContextsClient contextsClient = ContextsClient.create()) {
       final SessionName session = SessionName.of(projectID, sessionID);

@@ -36,8 +36,8 @@ public class HangoutsAsyncService extends AsyncService {
 
   @Override
   @Async("asyncExecutor")
-  public void chatServiceRequestHandler(final ChatServiceRequest chatServiceRequest)
-      throws Exception {
+  public void chatServiceRequestHandler(final ChatServiceRequest chatServiceRequest) throws IOException
+       {
     final String spaceID = chatServiceRequest.getSender().getChatClientGeneratedId();
     switch (chatServiceRequest.getRequestType()) {
       case ADDED:
@@ -57,7 +57,7 @@ public class HangoutsAsyncService extends AsyncService {
   }
 
   // handle requests which contain a user message
-  private void handleMessageEvent(final ChatServiceRequest chatServiceRequest) throws Exception {
+  private void handleMessageEvent(final ChatServiceRequest chatServiceRequest) throws IOException {
     final String spaceID = chatServiceRequest.getSender().getChatClientGeneratedId();
     // The spaceID of the user is used as the sessionID for hangouts
     dialogflowConversation.setSessionID(spaceID);
@@ -116,8 +116,8 @@ public class HangoutsAsyncService extends AsyncService {
 
   @Override
   @Async("asyncExecutor")
-  public void triggerEventHandler(final TriggerEventNotification triggerEventNotification)
-      throws Exception {
+  public void triggerEventHandler(final TriggerEventNotification triggerEventNotification) throws IOException
+       {
     final ChatClient chatClient =
         ChatClient.valueOf(triggerEventNotification.getChatClient().name());
     final String userID = triggerEventNotification.getUserID();
