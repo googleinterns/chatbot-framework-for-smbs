@@ -11,7 +11,8 @@
 - Add the service account key to `intentgen/src/main/resources/service-acct.json`
 - Set the projectID environment
 
-        export projectid=<projectID>
+        export projectID=<projectID>
+        export GOOGLE_APPLICATION_CREDENTIALS=<path-to-credentials-file>
 - Add the protxt file describing the usecase to `intentgen/src/main/resources`
 - Generate the intents
 
