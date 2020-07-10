@@ -17,7 +17,6 @@ import com.google.cloud.dialogflow.v2.Intent.Parameter;
 import com.google.cloud.dialogflow.v2.Intent.TrainingPhrase;
 import com.google.cloud.dialogflow.v2.Intent.WebhookState;
 import com.google.cloud.dialogflow.v2.Intent.TrainingPhrase.Part;
-import com.google.cloud.dialogflow.v2.IntentsClient;
 import com.google.cloud.dialogflow.v2.ProjectAgentName;
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
@@ -31,8 +30,8 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 public class IntentGenerator {
-  private static final List<String> YES_TRAINING_PHRASES = new ArrayList<String>(Arrays.asList("yes",
-      "okay I will", "why not", "yes that's alright", "yes I do", "exactly", "of course",
+  private static final List<String> YES_TRAINING_PHRASES = new ArrayList<String>(Arrays.asList(
+      "yes", "okay I will", "why not", "yes that's alright", "yes I do", "exactly", "of course",
       "yep that's ok", "okay", "ok", "sure"));
   private static final List<String> NO_TRAINING_PHRASES = new ArrayList<String>(Arrays.asList("No",
       "thanks but no", "no way", "no no don't", "na", "no it isn't", "don't", "nah I'm good",
@@ -45,7 +44,7 @@ public class IntentGenerator {
 
   public static void main(final String[] args) throws ParseException, IllegalArgumentException,
       IOException {
-    Options options = new Options();
+    final Options options = new Options();
     final Option useCaseFile = Option.builder("f").hasArg()
         .desc("prototxt file describing the use case" ).build();
     options.addOption(useCaseFile);
@@ -55,27 +54,31 @@ public class IntentGenerator {
     if(fileName.isEmpty()) {
       throw new IllegalArgumentException("No file name provided");
     }
-    projectID = System.getenv("projectID");
-    final ProjectAgentName parent = ProjectAgentName.of(projectID);
-    try(IntentsClient intentsClient = IntentsClient.create()) {
-      // this map is needed to check if an intent display name already exists and if so, instead of 
-      // creating an intent (which would return an error) we update the intent using the name
-      generateIntentDisplayNametoNameMapping(intentsClient, parent);
-      final List<Intent> intentProtobufList = getIntentsInUseCase(fileName).stream()
-          .map(x->buildIntentProtobufForIntent(x, projectID))
-          .collect(Collectors.toList());
-      createOrUpdateIntents(intentProtobufList, intentsClient, parent);
-    }
+    IntentsClientWrapper intentsClient = new IntentsClientWrapper();
+    generateIntents(fileName, ProjectAgentName.of(System.getenv("projectID")), intentsClient);
+    intentsClient.finalize();
+  }
+
+  static void generateIntents(final String fileName, final ProjectAgentName parent,
+      final IntentsClientWrapper intentsClient) throws IllegalArgumentException,
+      NullPointerException, IOException {
+    // this map is needed to check if an intent display name already exists and if so, instead of 
+    // creating an intent (which would return an error) we update the intent using the name
+    generateIntentDisplayNametoNameMapping(intentsClient, parent);
+    final List<Intent> intentProtobufList = getIntentsInUseCase(fileName).stream()
+        .map(x->buildIntentProtobufForIntent(x, projectID))
+        .collect(Collectors.toList());
+    createOrUpdateIntents(intentProtobufList, intentsClient, parent);
   }
 
   // To include entities into strings the syntax used is: |entity-type;alias;value|
   // A valid string would be "some text |@sys.name;name;Foo| some text"
-  static TrainingPhrase buildTrainingPhraseFromEncodedString(String trainingPhrase)
+  static TrainingPhrase buildTrainingPhraseFromEncodedString(final String trainingPhrase)
       throws IllegalArgumentException {
-    TrainingPhrase.Builder trainingPhraseProtobufBuilder = TrainingPhrase.newBuilder();
+    final TrainingPhrase.Builder trainingPhraseProtobufBuilder = TrainingPhrase.newBuilder();
     final String[] trainingPhraseParts = trainingPhrase.split("\\|");
-    List<Part> partProtobufList = new ArrayList<Part>();
-    for(String part: trainingPhraseParts) {
+    final List<Part> partProtobufList = new ArrayList<Part>();
+    for(final String part: trainingPhraseParts) {
       Part partProtobuf;
       // semicolon implies that this part is an entity
       if(part.indexOf(";") != -1) {
@@ -96,10 +99,10 @@ public class IntentGenerator {
     return trainingPhraseProtobufBuilder.addAllParts(partProtobufList).build();
   }
   
-  static List<UseCase.Intent> getIntentsInUseCase(String filename) throws IOException,
+  static List<UseCase.Intent> getIntentsInUseCase(final String filename) throws IOException,
       IllegalArgumentException, NullPointerException {
-    InputStream inputStream = IntentGenerator.class.getResourceAsStream("/" + filename);
-    String fileContent = CharStreams.toString(new InputStreamReader(
+    final InputStream inputStream = IntentGenerator.class.getResourceAsStream("/" + filename);
+    final String fileContent = CharStreams.toString(new InputStreamReader(
       inputStream, Charsets.UTF_8));
     if(fileContent.isEmpty()) {
       throw new IllegalArgumentException("File provided is empty");
@@ -110,10 +113,10 @@ public class IntentGenerator {
     return useCaseBuilder.build().getIntentsList();
   }
 
-  private static Intent.Builder addTrainingPhrases(UseCase.Intent intent,
-      Intent.Builder intentProtobufBuilder) {
-    List<TrainingPhrase> trainingPhrasesProtobufList = new ArrayList<TrainingPhrase>();
-    List<String> trainingPhrasesStringList =
+  private static Intent.Builder addTrainingPhrases(final UseCase.Intent intent,
+      final Intent.Builder intentProtobufBuilder) {
+    final List<TrainingPhrase> trainingPhrasesProtobufList = new ArrayList<TrainingPhrase>();
+    final List<String> trainingPhrasesStringList =
         new ArrayList<String>(intent.getTrainingPhrasesList());
     if(intent.getIntentType() == UseCase.IntentType.YES) {
       trainingPhrasesStringList.addAll(YES_TRAINING_PHRASES);
@@ -121,7 +124,7 @@ public class IntentGenerator {
     else if (intent.getIntentType() == UseCase.IntentType.NO) {
       trainingPhrasesStringList.addAll(NO_TRAINING_PHRASES);
     }
-    List<TrainingPhrase> userTrainingPhrases = trainingPhrasesStringList.stream()
+    final List<TrainingPhrase> userTrainingPhrases = trainingPhrasesStringList.stream()
         .map(trainingPhrase -> buildTrainingPhraseFromEncodedString(trainingPhrase))
         .collect(Collectors.toList()); 
     trainingPhrasesProtobufList.addAll(userTrainingPhrases);
@@ -129,29 +132,29 @@ public class IntentGenerator {
     return intentProtobufBuilder;
   }
 
-  private static Intent.Builder addResponses(UseCase.Intent intent,
-      Intent.Builder intentProtobufBuilder) {
+  private static Intent.Builder addResponses(final UseCase.Intent intent,
+      final Intent.Builder intentProtobufBuilder) {
     final Intent.Message message = Intent.Message.newBuilder()
         .setText(Intent.Message.Text.newBuilder().addAllText(intent.getResponsesList()).build())
         .build();
     return intentProtobufBuilder.addMessages(message);
   }
 
-  private static Intent.Builder addVariables(UseCase.Intent intent,
-      Intent.Builder intentProtobufBuilder) {
-      List<String> variables = intent.getVariablesList();
-      List<Parameter> parameters = variables.stream().map(variable -> 
+  private static Intent.Builder addVariables(final UseCase.Intent intent,
+      final Intent.Builder intentProtobufBuilder) {
+      final List<String> variables = intent.getVariablesList();
+      final List<Parameter> parameters = variables.stream().map(variable -> 
           Parameter.newBuilder().setDisplayName(variable).setValue("$" + variable)
           .setDefaultValue("#" + intent.getIntentName() + "Context." + variable).build())
           .collect(Collectors.toList());
       return intentProtobufBuilder.addAllParameters(parameters);
   }
 
-  private static Intent.Builder addOutputContexts(UseCase.Intent intent,
-      Intent.Builder intentProtobufBuilder, String projectID) {
-    List<Context> outputContextProtobufList= new ArrayList<Context>();
-    for(String successor: intent.getSuccessorsList()) {
-      Context contextProtobuf = Context.newBuilder()
+  private static Intent.Builder addOutputContexts(final UseCase.Intent intent,
+      final Intent.Builder intentProtobufBuilder, final String projectID) {
+    final List<Context> outputContextProtobufList= new ArrayList<Context>();
+    for(final String successor: intent.getSuccessorsList()) {
+      final Context contextProtobuf = Context.newBuilder()
       .setLifespanCount(1)
       .setName("projects/" + projectID + "/agent/sessions/-/contexts/" + successor + "Context")
       .build();
@@ -160,9 +163,9 @@ public class IntentGenerator {
     return intentProtobufBuilder.addAllOutputContexts(outputContextProtobufList);
   }
 
-  private static void createOrUpdateIntents(List<Intent> intentProtobufList,
-      IntentsClient intentsClient, ProjectAgentName parent) {
-    for(Intent intent: intentProtobufList) {
+  private static void createOrUpdateIntents(final List<Intent> intentProtobufList,
+      final IntentsClientWrapper intentsClient, final ProjectAgentName parent) {
+    for(final Intent intent: intentProtobufList) {
       if(intentDisplayNameToName.containsKey(intent.getDisplayName())) {
         intentsClient.updateIntent(intent, "en");
       }
@@ -172,7 +175,8 @@ public class IntentGenerator {
     }
   }
 
-  private static Intent buildIntentProtobufForIntent(UseCase.Intent intent, String projectID) {
+  private static Intent buildIntentProtobufForIntent(final UseCase.Intent intent,
+      final String projectID) {
     Intent.Builder intentProtobufBuilder = Intent.newBuilder();
     intentProtobufBuilder.setDisplayName(intent.getIntentName());        
     // output contexts need to be set to the input contexts of the successor intents
@@ -193,10 +197,9 @@ public class IntentGenerator {
   }
 
   private static void generateIntentDisplayNametoNameMapping(
-        IntentsClient intentsClient, ProjectAgentName parent) {
+      final IntentsClientWrapper intentsClient, final ProjectAgentName parent) throws IOException {
     intentDisplayNameToName = new HashMap<String, String>();
-    for (Intent intent : intentsClient.listIntents(parent).iterateAll()) {
-      intentDisplayNameToName.put(intent.getDisplayName(), intent.getName());
-    }
+    intentsClient.getIntentsList(parent)
+        .forEach(intent -> intentDisplayNameToName.put(intent.getDisplayName(), intent.getName()));
   }
 }

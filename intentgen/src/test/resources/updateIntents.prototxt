@@ -1,0 +1,6 @@
+intents {
+  intent_name: "intentA"
+}
+intents {
+  intent_name: "intentB"
+}
